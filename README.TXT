@@ -1,3 +1,4 @@
+*** MACHINE OPTIMIZATION HUMAN AUTOMATED NETWORKING - Web based django app ***
 ###
 # note that you need REDIST and CELERY installed. in dev you can run these using celery -A MohanWeb worker ... 
 # however if you decide to go down the prod/webserver/celery/redist thing.. read up some links.. 
