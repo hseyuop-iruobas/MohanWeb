@@ -1,0 +1,161 @@
+{% extends "base_generic.html" %}
+{% load widget_tweaks %}
+{% load static %}
+{% block content %}
+<script type="text/javascript" >
+  document.addEventListener('DOMContentLoaded', function() {
+    var elems = document.querySelectorAll('.collapsible');
+    var instances = M.Collapsible.init(elems, 'accordion');
+  });
+</script>
+
+<div class="container">
+	<h5>RITM/RuleInstance Details: {{ ruleinstance.id }}</h5>
+	<h6>Description: {{ ruleinstance.rule_description }} </h6><br>
+	<p>Status: {% if ruleinstance.isInUse %} <div class="red pulse"> Being Processed </div>{% else %} Ready {% endif %}</p><br>
+	<a href="{% url 'RITMupdate' ruleinstance.ruleinstance_primarykey %}" class="waves-effect waves-light btn-small">Update this RITM</a>
+	<a id="Button_make_Change" href="" class="waves-effect waves-light btn-small" onclick="makemeachange()">Create a Change</a>
+
+
+<br>
+<table class ="responsive-table striped">
+	<th>Source(s)</th>
+	<th>Destination(s)</th>
+	<th>service(s)</th>
+	<tr>
+		<td>
+			{% for object in ruleinstance.source.all %}
+				<a href = "{% url 'OBJECTDETAILS' object.object_id%}">{{ object.object_name }}</a><br>
+			{% endfor %}
+
+		</td>
+		<td>
+			{% for object in ruleinstance.dest.all %}
+				<a href = "{% url 'OBJECTDETAILS' object.object_id%}">{{ object.object_name }}</a><br>
+			{% endfor %}
+
+		</td>
+		<td>
+			{% for service in ruleinstance.service.all %}
+				<a href = "{% url 'SERVICEDETAILS' service.service_id%}">{{ service.service_name }}</a><br>
+			{% endfor %}
+
+		</td>
+	</tr>
+</table>
+
+  <ul class="collapsible">
+
+    <li>
+      	<div class="collapsible-header">Generated Rules:</div>
+			<div class="collapsible-body">
+				<span>
+
+						<b>Firewall Rule Name:</b> {{ ruleinstance.rule_name }}<br>
+						<b>Description:</b>  {{ ruleinstance.rule_description }}<br>
+						<b>Users:</b>  {{ ruleinstance.source_user}}<br>
+						<b>Security Profile:</b>  {{ ruleinstance.profile_group_name}}<br>
+						<b>Schedule:</b>  {% if ruleinstance.rule_duration == '0'  %} No Schedule {% else %} {{ ruleinstance.rule_duration }} {% endif %}<br>
+						<b>Applications:</b>  {{ ruleinstance.application }}<br>
+ 						<b>Category (if applicable):</b>  {{ ruleinstance.catagory_name }}<br>
+						<b>URLS:</b>
+						<table class="responsive-table" style = "table-layout: fixed;
+																margin-left: auto;
+																margin-right: auto;">
+							{% if ruleinstance.urls == 'Object Not Present' %}
+							<div class = 'red'>
+							<tr style="word-wrap:break-word"><td style="word-wrap:break-word">{{ ruleinstance.urls }}</td></tr>
+							</div>
+							{% else %}
+							<tr style="word-wrap:break-word"><td style="word-wrap:break-word">{{ ruleinstance.urls }}</td></tr>
+							{% endif %}
+						</table>
+				</span>
+			<span><p><i>Please Note it may take a few minutes for Firewall Rules to be calculated for a new Rule Instance
+			if nothing shows up after a few minutes (depending on # of objects in the ruleset
+			please reach out to Network team with either the direct Link to this page or the rule instance ID {{ ruleinstance.ruleinstance_primarykey }}</i></p></span>
+			<table>
+				<th>Pushed to Firewall?</th>
+				<th>Action</th>
+				<th>Firewall</th>
+				<th>Source Zone</th>
+				<th>Destination Zone</th>
+				<th>Real Name on FW</th>
+				<th>Security Profile applied</th>
+				{% for firewallrule in ruleinstance.rule_instance.all %}
+					  <tr>
+						  <td>{{ firewallrule.pushed_to_firewall }}</td>
+						  <td>{{ firewallrule.action }}</td>
+						  <td>{{ firewallrule.devicegroup.firewall_Name }}</td>
+						  <td>{%for source in firewallrule.source_zone.all %}
+							<p>{{ source }}</p>
+						  {% endfor %}
+						  </td>
+						  <td>{%for dest in firewallrule.destination_zone.all %}
+							<p>{{ dest }}</p>
+						  {% endfor %}
+						  </td>
+						  <td>{{ firewallrule.name_on_the_firewall }}</td>
+						  <td> {{ firewallrule.profile_group_name }}</td>
+					  </tr>
+				{% endfor %}
+			</table>
+	  </div>
+    </li>
+	<li>
+      <div class="collapsible-header">created by</div>
+      <div class="collapsible-body"><span>Created by:{{ ruleinstance.created_by }}</span></div>
+	  <div class="collapsible-body"><span>Created On:{{ ruleinstance.creation_date }}</span></div>
+    </li>
+	
+  </ul>
+
+</div>
+
+<script  type="text/javascript" >
+				function redirectMe(id){
+					window.location.href = "{% url 'CHANGELIST' %}"+id
+				};
+
+	function makemeachange(){
+				event.preventDefault();
+				$('#Button_make_Change').disabled = true;
+				console.log("form submitted!")  // sanity check
+				M.toast({html: "I've posted your request - may take a few to get the result!", classes: 'green rounded', displayLength:2000});
+				$.ajax({
+					url : "{% url 'CHANGECreate' %}",
+					type: "POST",
+					header: {'X-CSRFToken': '{{ csrf_token }}'},
+					data: {
+						'requests_in_change': {{ ruleinstance.ruleinstance_primarykey }},
+						'csrfmiddlewaretoken': '{{ csrf_token }}',
+						'request_type' : 'FIREWALL_RULE',
+
+					},
+					'dataType': 'json',
+					success : function(json) {
+				    	    console.log(json.result);
+				    	    if (json.result == 'success'){
+				    	        $('#view_record_button').show();
+				    	        M.toast({html: "I made the change - " + json.change_number + " - \( ﾟヮﾟ)/", classes: 'green rounded', displayLength:2000});
+				    	        console.log("success");
+				    	        console.log(json.change_number);
+				    	        setTimeout(redirectMe(json.change_id), 5000);
+				    	        $('#Button_make_Change').disabled = False;
+
+				    	    } else {
+				    	        M.toast({html: "( ・◇・)？something went wrong with this request. Check the console logs (f12)", classes: 'red rounded', displayLength:6000});
+				    	        M.toast({html: "( ・◇・)？Actually "+ json.data, classes: 'red rounded', displayLength:6000});
+				    	        console.log(json.data);
+				    	        $('#view_record_button').hide();
+				    	    }
+
+				    },
+					error : function(xhr,errmsg,err) {
+						M.toast({html: "SOMETHING WENT HORRIBLY WRONG", classes: 'red rounded', displayLength:6000});
+						console.log(xhr.status + ": " + xhr.responseText); // provide a bit more info about the error to the console
+					}
+					})};
+</script>
+
+{% endblock %}

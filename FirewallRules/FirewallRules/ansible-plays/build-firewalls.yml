@@ -1,0 +1,175 @@
+- name: adds firewall rules to firewall reading the firewall_rules.yml file
+  hosts: panorama
+  connection: local
+  gather_facts: False
+  vars_files: 
+    - 'inventory/firewall-secrets.yml'
+    - '../results/firewall_rules.yml'
+    - 'vars/vars.yml'
+
+
+  collections:
+    - paloaltonetworks.panos
+
+  vars:
+    noSchedule: 'NOSCHEDULE'
+    IsPresent: 'present'
+    shareddevicegroup: 'shared'
+
+    
+  tasks:
+
+  - name: "Removing OLD RULES - this is scary - be afraid"
+    panos_security_rule:
+        provider: '{{ PANO_Provider }}'
+        device_group: '{{ item.devicegroup }}'
+        rule_name: '{{ item.rule_name }}'
+        state: "{{ item.state }}"
+    loop: "{{ firewall_rules }}"
+    when:
+        - 'item.state not in IsPresent'
+
+
+  - name: Add rules to FW with Schedule
+    panos_security_rule:
+      provider: '{{ PANO_Provider }}'
+      device_group: '{{ item.devicegroup }}'
+      rule_name: '{{ item.rule_name }}'
+      description: '{{ item.rule_description }}'
+      source_zone: '{{ item.source_zone.split(",") }}'
+      destination_zone: '{{ item.destination_zone.split(",") }}'
+      source_ip: '{{ item.source_ip.split(",") }}'
+      source_user: '{{ item.source_user.split(",") }}'
+      destination_ip: '{{ item.destination_ip.split(",") }}'
+      category: '{{ item.category.split(",") }}'
+      application: '{{ item.application.split(",") }}'
+      service: '{{ item.service.split(",") }}'
+      group_profile: '{{ item.profile_group_name }}'
+      action: '{{ item.action }}'
+      log_setting: '{{ item.log_setting }}'
+      schedule:  "{{ item.rule_schedule }}"
+      commit: 'False'
+    when:
+      - 'item.rule_schedule not in noSchedule'
+      - 'item.devicegroup not in shareddevicegroup'
+      - 'item.state in IsPresent'
+    loop: "{{ firewall_rules }}"
+
+
+
+  - name: Add rules to FW with no Schedule
+    panos_security_rule:
+      provider: '{{ PANO_Provider }}'
+      device_group: '{{ item.devicegroup }}'
+      rule_name: '{{ item.rule_name }}'
+      description: '{{ item.rule_description }}'
+      source_zone: '{{ item.source_zone.split(",") }}'
+      destination_zone: '{{ item.destination_zone.split(",") }}'
+      source_ip: '{{ item.source_ip.split(",") }}'
+      source_user: '{{ item.source_user.split(",") }}'
+      destination_ip: '{{ item.destination_ip.split(",") }}'
+      category: '{{ item.category.split(",") }}'
+      application: '{{ item.application.split(",") }}'
+      service: '{{ item.service.split(",") }}'
+      group_profile: '{{ item.profile_group_name }}'
+      action: '{{ item.action }}'
+      log_setting: '{{ item.log_setting }}'
+      commit: 'False'
+    loop: "{{ firewall_rules }}"
+    when:
+      - 'item.rule_schedule in noSchedule'
+      - 'item.devicegroup not in shareddevicegroup'
+      - 'item.state in IsPresent'
+
+  - name: "Fix hip-profiles issue"
+    panos_type_cmd:
+      provider: "{{ PANO_Provider }}"
+      cmd: "delete"
+      xpath: "/config/devices/entry[@name='localhost.localdomain']/device-group/entry[@name='{{ item.devicegroup }}']/pre-rulebase/security/rules/entry[@name='{{ item.rule_name }}']/hip-profiles"
+    loop: "{{ firewall_rules }}"
+    when:
+      - 'item.devicegroup not in shareddevicegroup'
+      - 'item.state in IsPresent'
+
+
+
+
+
+  - name: Add rules to FW with no Schedule and shared device group in POST location
+    panos_security_rule:
+      provider: '{{ PANO_Provider }}'
+      #device_group: 'shared'
+      rulebase: 'post-rulebase'
+      location: 'bottom'
+      rule_name: '{{ item.rule_name }}'
+      description: '{{ item.rule_description }}'
+      source_zone: '{{ item.source_zone.split(",") }}'
+      destination_zone: '{{ item.destination_zone.split(",") }}'
+      source_ip: '{{ item.source_ip.split(",") }}'
+      source_user: '{{ item.source_user.split(",") }}'
+      destination_ip: '{{ item.destination_ip.split(",") }}'
+      category: '{{ item.category.split(",") }}'
+      application: '{{ item.application.split(",") }}'
+      service: '{{ item.service.split(",") }}'
+      group_profile: '{{ item.profile_group_name }}'
+      action: '{{ item.action }}'
+      log_setting: '{{ item.log_setting }}'
+      commit: 'False'
+    loop: "{{ firewall_rules }}"
+    when:
+      - 'item.rule_schedule in noSchedule'
+      - 'item.devicegroup in shareddevicegroup'
+      - 'item.state in IsPresent'
+
+
+
+  - name: "Fix hip-profiles issue no schedule and shared "
+    panos_type_cmd:
+      provider: "{{ PANO_Provider }}"
+      cmd: "delete"
+      xpath: "/config/shared/post-rulebase/security/rules/entry[@name='{{ item.rule_name }}']/hip-profiles"
+    loop: "{{ firewall_rules }}"
+    when:
+      - 'item.rule_schedule in noSchedule'
+      - 'item.devicegroup in shareddevicegroup'
+
+
+
+  - name: "Add rules to FW with Schedule and shared device group in POST location"
+    panos_security_rule:
+      provider: '{{ PANO_Provider }}'
+      #device_group: 'shared'
+      rulebase: 'post-rulebase'
+      location: 'bottom'
+      rule_name: '{{ item.rule_name }}'
+      description: '{{ item.rule_description }}'
+      source_zone: '{{ item.source_zone.split(",") }}'
+      destination_zone: '{{ item.destination_zone.split(",") }}'
+      source_ip: '{{ item.source_ip.split(",") }}'
+      source_user: '{{ item.source_user.split(",") }}'
+      destination_ip: '{{ item.destination_ip.split(",") }}'
+      category: '{{ item.category.split(",") }}'
+      application: '{{ item.application.split(",") }}'
+      service: '{{ item.service.split(",") }}'
+      group_profile: '{{ item.profile_group_name }}'
+      action: '{{ item.action }}'
+      log_setting: '{{ item.log_setting }}'
+      schedule:  "{{ item.rule_schedule }}"
+      commit: 'False'
+    loop: "{{ firewall_rules }}"
+    when:
+      - 'item.rule_schedule not in noSchedule'
+      - 'item.devicegroup  in shareddevicegroup'
+      - 'item.state in IsPresent'
+
+  - name: "Fix hip-profiles issue with schedule and red device group "
+    panos_type_cmd:
+      provider: "{{ PANO_Provider }}"
+      cmd: "delete"
+      xpath: "/config/shared/post-rulebase/security/rules/entry[@name='{{ item.rule_name }}']/hip-profiles"
+    loop: "{{ firewall_rules }}"
+    when:
+        - 'item.rule_schedule not in noSchedule'
+        - 'item.devicegroup  in shareddevicegroup'
+        - 'item.state in IsPresent'
+

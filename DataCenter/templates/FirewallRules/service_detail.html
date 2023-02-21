@@ -1,0 +1,38 @@
+{% extends "base_generic.html" %}
+
+{% block content %}
+<script type="text/javascript" >
+  document.addEventListener('DOMContentLoaded', function() {
+    var elems = document.querySelectorAll('.collapsible');
+    var instances = M.Collapsible.init(elems, 'accordion');
+  });
+  document.addEventListener('DOMContentLoaded', function() {
+			var elems = document.querySelectorAll('.sidenav');
+			var instances = M.Sidenav.init(elems, options);
+		});
+</script>
+<div class="container">
+<h4>Services - Details</h4>
+<table>
+<tr>
+<a href="{% url 'SERVICEupdate' service.service_id %}" class="waves-effect waves-light btn-small">Update this Service</a>
+</tr>
+<tr></tr>
+</table>
+
+
+
+<table class = 'table'>
+<tr>
+<th>Service Name</th><th>Port/Port-Range</th><th>Protocol</th>
+</tr>
+<tr>
+<td>{{ service.service_name }}</td>
+<td>{{ service.service_dest_port }}</td>
+<td>{{ service.service_protocol }}</td>
+</tr>
+</table><br>
+
+</div>
+
+{% endblock %}

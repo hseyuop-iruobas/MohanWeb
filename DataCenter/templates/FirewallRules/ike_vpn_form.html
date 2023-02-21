@@ -1,0 +1,123 @@
+{% extends "base_generic.html" %}
+{% block content %}
+
+
+<div class = 'container'>
+{% if messages %}
+  {% for message in messages %}
+     {% if message.type == 'success' %}
+      <script>
+         M.toast({html: "{{ message.message }}", classes: 'green rounded', displayLength:2000});
+      </script>
+	 {% endif %}
+	 {% if message.type == 'warning' %}
+      <script>
+         M.toast({html: "{{ message.message }}", classes: 'orange rounded', displayLength:6000});
+      </script>
+	 {% endif %}
+	 {% if message.type == 'error' %}
+      <script>
+         M.toast({ html: "{{ message.message }}", classes: 'red rounded', displayLength:20000});
+      </script>
+	 {% endif %}
+  {% endfor %}
+{% endif %}
+
+{% if action == 'UPDATE' %}
+    <h1>Updating:</h1>
+{% else %}
+    <h1>Create a new IKE VPN</h1>
+{% endif %}
+
+	{{ form.media.css }}
+    <style>
+        .select2-container {
+			width: 100% !important;
+		}
+    </style>
+
+			<form method="POST" >
+				{% csrf_token %}
+				{% load materializecss %}
+				{{ form.hidden_value.as_hidden }}
+
+			<div class = 'table'>
+				<table><tr><th style = "width:30%">Gateway Name</th><th style = "width:40%">Crypto Profile</th><th style = "width:30%">IPSEC Profile</th></tr>
+					<tr>
+					<td> {{ form.ike_gateway_name }} </td>
+					<td> {{ form.crypto_profile }} </td>
+					<td> {{ form.ipsec_profile }} </td>
+					</table>
+					<table style = 'width:100%'>
+					<tr><th style = "width:30%">Tunnel Interface:</th><th style = "width:40%"></th><th style = "width:30%">Tunnel Source/Frontdoor Interface</th>
+					<tr>
+					<td> {{ form.tunnel_interface }} </td>
+					<td></td>
+					<td> {{ form.tunnel_front_door }} </td>
+
+					</table>
+				<table>
+			    <th style = "width:33%">Peer IP Address</th><th>VPN KEY</th>
+				<tr>
+				<td> {{ form.peer_outside_address }} </td>
+					<td> {{ form.pre_shared_key }} </td>
+				</tr>
+				</table>
+				<table>
+			    <th style = "width:33%">Pano Username</th><th>Pano Password</th>
+				<tr>
+					<td> {{ form.pano_username }} </td>
+					<td> {{ form.pano_password }} </td>
+
+				</tr>
+				</table>
+
+					<br>
+
+				<input type="submit" class="waves-effect waves-light btn-small">
+
+	       </div>
+
+
+
+				{% load static %}
+
+<!--		    <script type="text/javascript" src="{% static 'js/django_select2.js' %}"></script>-->
+<!--			<script type="text/javascript" src="{% static 'js/jquery.min.js' %}"></script>-->
+			<script type="text/javascript" >
+			     $( window ).on("load", function() {
+				   if ($("#id_object_type").val() != 'address-group') {
+			          $('#object_group_members').hide();
+			       }
+			    });
+				document.addEventListener('DOMContentLoaded', function() {
+					var elems = document.querySelectorAll('.collapsible');
+					var instances = M.Collapsible.init(elems, 'accordion');
+				});
+				document.addEventListener('DOMContentLoaded', function() {
+							var elems = document.querySelectorAll('.sidenav');
+							var instances = M.Sidenav.init(elems, options);
+						});
+				$("#object_name",).keyup(function(){
+					update();
+					});
+
+				function update() {
+					$("#object_description").val($('#object_name').val());
+				};
+
+				$("#id_object_type",).change(function(){
+				  if ($(this).val() == 'address-group'){
+				     $('#object_group_members').show();
+					 $('#object_value_table').hide();
+                  } else {
+				     $('#object_group_members').hide();
+					 $('#object_value_table').show();
+			      }
+				 });
+				$("#id_object_type").trigger("change");
+			</script>
+			{{ form.media.js }}
+			</form>
+</div>
+{% endblock %}

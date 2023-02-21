@@ -1,0 +1,130 @@
+{% extends "base_generic.html" %}
+
+
+{% block content %}
+<script type="text/javascript" >
+  document.addEventListener('DOMContentLoaded', function() {
+    var elems = document.querySelectorAll('.collapsible');
+    var instances = M.Collapsible.init(elems, 'accordion');
+  });
+  document.addEventListener('DOMContentLoaded', function() {
+			var elems = document.querySelectorAll('.sidenav');
+			var instances = M.Sidenav.init(elems, options);
+		});
+    document.addEventListener('DOMContentLoaded', function() {
+    var elems = document.querySelectorAll('.tooltipped');
+    var instances = M.Tooltip.init(elems, options);
+  });
+  document.addEventListener('DOMContentLoaded', function() {
+    var elems = document.querySelectorAll('.tooltipped');
+    var instances = M.Tooltip.init(elems, exitDelay=10);
+  });
+</script>
+<br>
+<div class = "row">
+{% if messages %}
+  {% for message in messages %}
+     {% if message.type == 'success' %}
+      <script>
+         M.toast({html: "{{ message.message }}", classes: 'green rounded', displayLength:2000});
+      </script>
+	 {% endif %}
+	 {% if message.type == 'warning' %}
+      <script>
+         M.toast({html: "{{ message.message }}", classes: 'orange rounded', displayLength:6000});
+      </script>
+	 {% endif %}
+	 {% if message.type == 'error' %}
+      <script>
+         M.toast({ html: "{{ message.message }}", classes: 'red rounded', displayLength:20000});
+      </script>
+	 {% endif %}
+  {% endfor %}
+{% endif %}
+	<div class="col s2">
+	</div>
+	<div class="container left col s10">
+		<h4>Inspect Firewall Flow</h4>
+		<h6></h6>Can {{ mytask.task_search_term }}?</h6>
+	<!--<a class="waves-effect waves-light btn-small right-align" href='{% url "RERUNSEARCHLOG" mytask.task_id %}'>Re-Run Query</a>!-->
+	
+	
+	<ul class="collapsible">
+		<li>
+		<div class="collapsible-header">Task Details  </div>
+			<div class="collapsible-body"><span>Task Number is: <strong>{{ mytask.task_id }}</strong></span></div>
+			<div class="collapsible-body"><span>Ask Was: <strong>{{ mytask.task_search_term }}</strong></span></div>
+			<div class="collapsible-body"><span>Status is: <strong>{{ mytask.task_status }}</strong></span></div>
+		</li>
+		<li>
+		<div class="collapsible-header">Created on/by:</div>
+			<div class="collapsible-body"><span>created on {{ mytask.creation_date }}</span></div>
+			<div class="collapsible-body"><span>Created by: {{ mytask.db_created_by }}</span></div>
+		</li>
+		<li>
+			<div class="collapsible-header">Mohan's take on your ask:</div>
+			<div class="collapsible-body">
+				<span>
+					{% if mytask.myAPIKey == "bad creds" %}
+						<h6 class = 'orange'>
+							<p>Hey I got bad creds from you. IS it possible that you do not have the correct privs?
+							check with network team or Panorama, do you have at minimum a read only account with all firewalls?
+							if not put a request in through service now! although I can't tell you what I found the results may have <b>shocked</b> you</p>
+						</h6>
+					{% else %}
+						{% if results %}
+							{% for line in results %}
+							   {% if line.result == 'allow' %}
+								  <h6 class = 'green'>some firewalls are allowing your traffic </h6>
+							   {% endif %}
+
+							   {% if line.result != 'allow' %}
+								  <h6 class = 'red'>some firewalls are Not allowing your traffic </h6>
+							   {% endif %}
+							{% endfor %}
+
+						 {% else %}
+							 <h6> Mohan Has no Comms this is bad? or good? or unknown </h6>
+						 {% endif %}
+					{% endif %}
+				</span>
+			</div>
+		</li>
+	</ul>
+		{% if results %}
+			<table class="responsive-table">
+			<thead>
+			<tr style="width: auto;">
+			<th style ="font-size:0.875em">Firewall inline</th>
+			<th style ="font-size:0.875em">Virtual Router</th>
+			<th style ="font-size:0.875em">Source Zone</th>
+			<th style ="font-size:0.875em">Destination Zone</th>
+			<th style ="font-size:0.875em">action</th>
+			<th style ="font-size:0.875em">Matched Rule Name</th>
+
+			</tr></thead>
+			<tbody>
+			{% for line in results %}
+			<tr>
+				<td style ="font-size:0.875em">{{ line.devicegroup }}</td>
+				<td style ="font-size:0.875em">{{ line.routing_bubble }}</td>
+				<td style ="font-size:0.875em">{{ line.source_zone }}</td>
+				<td style ="font-size:0.875em">{{ line.destination_zone }}</td>
+				<td style ="font-size:0.875em">{{ line.result }}</td>
+				{% if line.rule_id %}
+					<td style ="font-size:0.875em"><a href="{% url 'RITMDetails' line.rule_id %}">{{ line.matched_name }}</a></td>
+				{% else %}
+				<td style ="font-size:0.875em">{{ line.matched_name }}</td>
+				{% endif %}
+
+			</tr>			 
+			{% endfor %}
+			</tbody>		
+			</table>		
+	    {% else %}
+		    <h5> Sorry Mohan couldn't find any answers to life or your question? can you change the source code? or reach someone who can? HELP mohan!</h5>
+		{% endif %}
+	
+	</div>
+</div>
+{% endblock %}

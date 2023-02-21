@@ -1,0 +1,103 @@
+{% block content %}
+{% load static %}
+{% load widget_tweaks %}
+{{ form.media.css }}
+   {% if messages %}
+      {% for message in messages %}
+         {% if message.type == 'success' %}
+          <script>
+             M.toast({html: "{{ message.message }}", classes: 'green rounded', displayLength:2000});
+          </script>
+         {% endif %}
+         {% if message.type == 'warning' %}
+          <script>
+             M.toast({html: "{{ message.message }}", classes: 'orange rounded', displayLength:6000});
+          </script>
+         {% endif %}
+         {% if message.type == 'error' %}
+          <script>
+             M.toast({ html: "{{ message.message }}", classes: 'red rounded', displayLength:20000});
+          </script>
+         {% endif %}
+      {% endfor %}
+    {% endif %}
+    <style>
+        .select2-container {
+			width: 100% !important;
+		}
+    </style>
+<div>
+			<form method="POST" id="post-form">
+				{% csrf_token %}
+				{% load materializecss %}
+				{{ form.hidden_value.as_hidden }}
+			<div class = table>
+				<table><tr><th style = "width:30%">Address Group Name</th><th style = "width:40%"></th><th style = "width:30%">Address Group Members</th></tr>
+					<tr>
+					<td> {% if action == 'UPDATE'  %}
+                            {% render_field form.object_name id="object_name" readonly='True' %}
+                         {% else %}
+                           {% render_field form.object_name id="object_name" %}
+                         {% endif %}
+                    </td>
+					<td>
+					</td>
+					<td> {{ form.object_group_members|attr:"id:object_group_members" }} </td>
+					</tr>
+				</table>
+				<table>
+                </table>
+            </div>
+                {% if action == 'UPDATE'  %}
+                <input type="submit" class="waves-effect waves-light btn-small" value="Update Address Group">
+                {% else %}
+                <input type="submit" class="waves-effect waves-light btn-small" value="Create Address Group">
+                {% endif %}
+            </form>
+</div>
+<script type="text/javascript" >
+function redirectMe_to_address_group(id){
+					window.location.href = "../../object/"+id;
+				};
+
+    $('#post-form').on('submit', function(event){
+				event.preventDefault();
+				console.log("form submitted!")  // sanity check
+				M.toast({html: "I've posted your request - may take a few to get the result!", classes: 'green rounded', displayLength:2000});
+				$.ajax({
+					url : "{% url 'OBJECTCreateAddressGroup' %}",
+					type: "POST",
+					header: {'X-CSRFToken': '{{ csrf_token }}'},
+					data: {
+						'object_name': document.getElementById("object_name").value,
+						'object_group_members': $('#object_group_members').select2('val'),
+						'csrfmiddlewaretoken': '{{ csrf_token }}',
+						'action': '{{ action }}',
+
+					},
+					'dataType': 'json',
+					success : function(json) {
+				    	    console.log(json.result);
+				    	    if (json.result == 'success'){
+				    	        M.toast({html: json.data +" - \( ﾟヮﾟ)/", classes: 'green rounded', displayLength:2000});
+				    	        console.log("success");
+				    	        console.log(json.rule_id);
+				    	        M.toast({html: "Im Going to Transition you to next page in 5 seconds", classes: 'green rounded', displayLength:2000});
+				    	        setTimeout(redirectMe_to_address_group(json.object_id), 5000);
+				    	    } else {
+				    	        M.toast({html: "( ・◇・)？something went wrong with this request. Check the console logs (f12)", classes: 'red rounded', displayLength:6000});
+				    	        M.toast({html: "( ・◇・)？Actually the backend says: "+ json.data, classes: 'red rounded', displayLength:6000});
+				    	        console.log(json.data);
+				    	    }
+
+				    },
+					error : function(xhr,errmsg,err) {
+						M.toast({html: "SOMETHING WENT HORRIBLY WRONG", classes: 'red rounded', displayLength:6000});
+						console.log(xhr.status + ": " + xhr.responseText); // provide a bit more info about the error to the console
+					}
+					});});
+
+
+</script>
+
+{% endblock %}

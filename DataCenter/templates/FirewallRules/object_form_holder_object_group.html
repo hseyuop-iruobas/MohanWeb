@@ -1,0 +1,33 @@
+{% block content %}
+
+  {% if messages %}
+      {% for message in messages %}
+         {% if message.type == 'success' %}
+          <script>
+             M.toast({html: "{{ message.message }}", classes: 'green rounded', displayLength:2000});
+          </script>
+         {% endif %}
+         {% if message.type == 'warning' %}
+          <script>
+             M.toast({html: "{{ message.message }}", classes: 'orange rounded', displayLength:6000});
+          </script>
+         {% endif %}
+         {% if message.type == 'error' %}
+          <script>
+             M.toast({ html: "{{ message.message }}", classes: 'red rounded', displayLength:20000});
+          </script>
+         {% endif %}
+      {% endfor %}
+    {% endif %}
+<div align="center">
+    <br><br>
+    {% if object %}
+
+        <p> Object Group {{ object.object_name }} has been created from Panorama </p>
+        <a class="waves-effect waves-light btn-small" href="{% url 'OBJECTDETAILS'  object.object_id %}"> View Object-Group </a>
+    {% else %}
+        <p> Object Group was not Found </p>
+    {% endif %}
+    <br><br>
+</div>
+{% endblock %}

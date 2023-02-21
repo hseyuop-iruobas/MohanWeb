@@ -1,0 +1,40 @@
+
+
+  <ul id="slide-out" class="sidenav">
+    <li><div class="divider"></div></li>
+
+    <li><a class="subheader">Create</a></li>
+
+        <ul class="hide-on-med-and-down">
+          <li><a class="dropdown-trigger" href="#!" data-target="create_object_dropdown">Create Object</a></li>
+          <ul id='create_object_dropdown' class='dropdown-content'>
+              <li><a class="waves-effect" href="{% url 'OBJECTCreate' %}">Address</a></li>
+              <li><a class="waves-effect" href="{% url 'OBJECTCreateAddressGroup' %}">Address Group</a></li>
+              <li><a class="waves-effect" href="{% url 'EDLTOObJECTGROUPVIEW' %}">Address Group - Batch</a></li>
+          </ul>
+        </ul>
+<!--        <li><a class="waves-effect" href="{% url 'OBJECTCreate' %}">Create a new Object</a></li>-->
+		<li><a class="waves-effect" href="{% url 'SERVICECreate' %}">Create a Service</a></li>
+		<li><a class="waves-effect" href="{% url 'CHANGECreate' %}">Create a Change</a></li>
+        <li><div class="divider"></div></li>
+    <li><a class="subheader">Search</a></li>
+		<li><a class="waves-effect" href="{% url 'TESTFIREWALLFLOW' %}">Will This Flow GoGo?</a></li>
+		<li><a class="waves-effect" href="{% url 'NEWSEARCHLOG' %}">Why is our Packets dropping?</a></li>
+        <li><a href="{% url 'NEWSEARCHLOGover90000' %}">Can I see what it Talked to?</a></li>
+      <li><div class="divider"></div></li>
+    <li><a class="subheader">Task List and Changes</a></li>
+        <li><a class="waves-effect" href="{% url 'CHANGELIST' %}">View Changes</a></li>
+		<li><a class="waves-effect" href="{% url 'VIEWMYTASKSLISTS' %}">View Your Tasks</a></li>
+      <li><div class="divider"></div></li>
+      <li><a class="subheader">Firewall Services</a></li>
+      <ul class="hide-on-med-and-down">
+              <li><a class="dropdown-trigger" href="#!" data-target="Rule_instance_dropdown">Security Rules</a></li>
+              <ul id='Rule_instance_dropdown' class='dropdown-content'>
+                  <li><a class="waves-effect" href="{% url 'RITMCreate' %}">Create a New Flow</a></li>
+                  <li><a class="waves-effect" href="{% url 'SEARCHANDREPLACEVIEW' %}">Search and Replace</a></li>
+
+              </ul>
+      </ul>
+      <li><a class="waves-effect" href="{% url 'CREATEVPN' %}">Create a VPN</a></li>
+  </ul>
+

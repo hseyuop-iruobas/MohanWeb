@@ -1,0 +1,142 @@
+{%block content%}
+{%if ruleinstanceResults %}
+
+		<table id = "table_ruleinstance_id" class="table responsive-table scroll" >
+			<thead>
+				 <tr>
+					 <th>
+
+					 </th>
+					 <th>Rule Instance ID</th>
+					 <th>FW Rule Name</th>
+					 <th>Source</th>
+					 <th>Destination</th>
+					 <th>Service</th>
+					 <th>Application</th>
+					 <th>Schedule</th>
+					 <th>URLS</th>
+				</tr>
+			</thead>
+			<tbody>
+
+					{% for result in ruleinstanceResults %}
+					<tr>
+						<td>
+							 <p>
+							  <label>
+								<input id='{{ result.ruleinstance_primarykey }}' type="checkbox" />
+								<span></span>
+							  </label>
+							</p>
+						</td>
+						<td>
+							<a style="color:blue" href="{% url 'RITMDetails' result.ruleinstance_primarykey%}">{{ result.id }}</a>
+						</td>
+						<td>
+							 {{ result.rule_name }}
+						</td>
+						<td>
+							{% for source in result.source.all %}
+							   <p>{{ source.object_name }}</p>
+							{% endfor %}
+						</td>
+						<td>
+							{% for destination in result.dest.all %}
+							   <p>{{ destination.object_name }}</p>
+							{% endfor %}
+						</td>
+						<td>
+							{% for service in result.service.all %}
+							   <p>{{ service.service_name }}</p>
+							{% endfor %}
+						</td>
+						<td>
+							 {{ result.application }}
+						</td>
+						<td> {% if result.rule_duration != '0' %}
+							   <p> {{ result.rule_duration }}</p>
+							 {% else %}
+								<p>No Schedule</p>
+							{% endif %}
+						</td>
+						<td> {% if result.urls != '' %}
+							   <p> URLS Defined</p>
+							 {% else %}
+								<p>No URLs</p>
+							{% endif %}
+						</td>
+					</tr>
+					{% endfor %}
+			</tbody>
+		</table>
+
+		<br>
+		<button class="waves-effect waves-light btn-small" id="merge_button" onClick = 'replicateRules()' style="margin:5px">Replicate</button>
+
+
+<script type="text/javascript">
+	$(document).ready(function(){
+			$('#table_ruleinstance_id').DataTable({
+				keys: true,
+				dom: 'Bfrtip',
+				lengthMenu: [[ 10, 25, 50, -1],['10 rows', '25 rows', '50 rows', 'Show All' ]],
+				buttons: ['pageLength', 'colvis', 'copy', 'csv', 'excel', 'pdf', 'print'],
+				colReorder: true,
+				select: true
+			});
+			$('#id_select_all').click(function() {
+				$('.checkbox').prop('checked', $(this).prop('checked'));
+		  	});
+		});
+	function selectall(){
+		$('.checkbox').prop('checked', $(this).prop('checked'));
+	}
+	function redirectMe_to_search(id){
+					window.location.href = "../../search/"+id;
+				};
+	function replicateRules() {
+		  event.preventDefault();
+
+		  var mylabel = $('#ritm_label').val()
+		  if (mylabel.length > 4){
+			var selectedValues = $('input:checkbox:checked').map(function() {
+			  return this.id;
+			}).get();
+			console.log(selectedValues);
+			M.toast({html: "I will merged them all, you will Rule them all!- \( ﾟヮﾟ)/", classes: 'green rounded', displayLength:2000});
+			$.ajax({
+				url: "{% url 'REPLICATERULES' %}",
+				type: "POST",
+				header : {'X-CSRFToken': '{{ csrf_token }}'},
+				data: {
+					'rule_list_ids' : selectedValues,
+					'current_server_id' : $('#current_server_id').select2('val'),
+					'target_values' : $('#clone_target_id').select2('val'),
+					'rule_list_label' : document.getElementById("ritm_label").value,
+					'csrfmiddlewaretoken': '{{ csrf_token }}',
+				},
+				'dataType': 'json',
+				success: function(json) {
+
+					if (json.result == 'success'){
+						M.toast({html: "We Cloned them all - \( ﾟヮﾟ)/", classes: 'green rounded', displayLength:2000});
+						setTimeout(redirectMe_to_search(document.getElementById("ritm_label").value), 5000);
+					} else {
+						M.toast({html: "I dont know what to say? ask someone to check the logs. I failed because,", classes: 'red rounded', displayLength:6000});
+						M.toast({html: "maybe: "+ json.data , classes: 'red rounded', displayLength:6000});
+						console.log(json.data);
+					}
+				},
+				error : function(xhr,errmsg,err) {
+							M.toast({html: "SOMETHING WENT HORRIBLY WRONG", classes: 'red rounded', displayLength:6000});
+							console.log(xhr.status + ": " + xhr.responseText); // provide a bit more info about the error to the console
+				}
+			});
+			} else {
+				M.toast({html: "Need a Longer label", classes: 'green rounded', displayLength:2000});
+			}
+	};
+
+</script>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+
+  {% block title %}<title>Datacenter App</title>{% endblock %}
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- Add additional CSS in static file -->
+  {% load static %}
+  <!--link rel="stylesheet" href="{% static 'css/styles.css' %}"-->
+  <!--<script type="text/javascript" src="{% static 'admin/jsi18n/'%}"></script>-->
+  
+  
+
+    <link rel="stylesheet" href="{% static 'css/materialize.css'%}">
+    <link rel="stylesheet" href="{% static 'css/jquery.dataTables.min.css'%}">
+    <link rel="stylesheet" href="{% static 'css/buttons.dataTables.min.css'%}">
+    <script type="text/javascript" src="{% static 'js/jquery.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/materialize.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/jquery.dataTables.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/dataTables.buttons.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/select2.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/django_select2.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/pdfmake.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/vfs_fonts.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/buttons.html5.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/jszip.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/htmx.min.js' %}"></script>
+
+
+
+<style>
+body {
+  background-color: #eceff1   ;
+}
+::placeholder { /* Chrome, Firefox, Opera, Safari 10.1+ */
+  color: black;
+  opacity: 1; /* Firefox */
+}
+</style>
+</head>
+<body hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
+{% block sidebar %}
+    <ul id="dropdownFAQ" class="dropdown-content">
+        <li><a href="{% url 'TESTFIREWALLFLOW' %}">Will it Go?</a></li>
+        <li><a href="{% url 'NEWSEARCHLOG' %}">Almost sure it is the Firewall?</a></li>
+        <li><a href="{% url 'NEWSEARCHLOGover90000' %}">Traffic Report HOST</a></li>
+
+    </ul>
+
+
+
+    <ul id="dropdownDC" class="dropdown-content">
+      <li><a href="{% url 'VLANLIST' %}">All Vlan Information</a></li>
+      <li><a href="{% url 'TENANTLIST' %}">All VRFs/Tenants</a></li>
+    </ul>
+
+    <ul id="dropdownFW" class="dropdown-content">
+      <li><a href ="{% url 'CREATEVPN' %}"> Create a VPN</a></li>
+      <li><a href ="{% url 'SEARCHANDREPLACEVIEW' %}"> Search and Replace</a></li>
+      <li><a href="{% url 'OBJECTLIST' %}">Object List</a></li>
+      <li><a href="{% url 'SERVICELIST' %}">Services List</a></li>
+      <li><a href="{% url 'RITMLIST' %}">Rule Requests List</a></li>
+      <li><a href="{% url 'CHANGELIST' %}">Change List</a></li>
+      <li><a href="{% url 'VIEWMYTASKSLISTS' %}">View My Tasks</a></li>
+
+    </ul>
+
+  <nav>
+    <div class="nav-wrapper grey lighten-1">
+      <a href="{% url 'index' %}" class="brand-logo">Ask Mohan</a>
+      <ul id="nav-mobile" class="right hide-on-med-and-down">
+        <li><a href="{% url 'index' %}">Home</a></li>
+		<li><a class="dropdown-trigger" href="#!" data-target="dropdownFAQ">Monitoring Tasks</a></li>
+		<li><a class="dropdown-trigger" href="#!" data-target="dropdownDC">DataCenter Services</a></li>
+		<li><a class="dropdown-trigger" href="#!" data-target="dropdownFW">Firewall Services</a></li>
+		{% if user.is_authenticated %}
+				<li>User: {{ user.get_username }}</li>
+				<li><a href="{% url 'logout'%}?next={{request.path}}">Logout</a></li>
+		{% else %}
+				<li><a href="{% url 'login'%}?next={{request.path}}">Login</a></li>
+		{% endif %}
+		</ul>
+    </div>
+
+  </nav>
+
+<div class = 'row black' style="height:2px;"></div>
+<div class = 'row'>
+           <div class="left col s4">
+              <form action = "{% url 'SEARCHRESULT' %}" method = 'POST' id="search_form">
+                {% csrf_token %}
+                <div class="input-field white" >
+                  <input id="search" type="search" name='searched' placeholder="Search..." style="height:30px;">
+                </div>
+                  <button class="waves-effect waves-light btn-small" type="submit">Search</button>
+              </form>
+           </div>
+                <div align="right" class = "col s1 offset-s7">
+                          {% include "sidenav.html" %}
+                    <a href="#" data-target="slide-out" class="sidenav-trigger waves-effect waves-light btn-small right">Menu</a>
+            </div>
+    </div>
+
+
+
+  <script type="text/javascript">
+    
+    document.addEventListener('DOMContentLoaded', function() {
+    var elems = document.querySelectorAll('.sidenav');
+    var instances = M.Sidenav.init(elems, {});
+	});
+	document.addEventListener('DOMContentLoaded', function() {
+	var elems = document.querySelectorAll('.dropdown-trigger');
+	var instances = M.Dropdown.init(elems, {'alignment':'left', 'hover':'True'});
+	});
+
+
+  </script>
+
+{% endblock %}
+
+
+
+
+{% block content %}
+{% endblock %}
+<div class = 'container' >
+{% block pagination %}
+    {% if is_paginated %}
+        <div class="pagination">
+            <span class="page-links">
+                {% if page_obj.has_previous %}
+                    <a href="{{ request.path }}?page={{ page_obj.previous_page_number }}">previous</a>
+                {% endif %}
+                <span class="page-current">
+                    Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
+                </span>
+                {% if page_obj.has_next %}
+                    <a href="{{ request.path }}?page={{ page_obj.next_page_number }}">next</a>
+                {% endif %}
+            </span>
+        </div>
+    {% endif %}
+{% endblock %}
+</div>
+<div class = 'container' >
+    <p>Your Ad Can go here {{ request.user.first_name }}?</p>
+</div>
+
+
+    <script type="text/javascript" src="{% static 'js/materialize.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/htmx.min.js' %}"></script>
+
+</body>
+</html>

@@ -1,0 +1,72 @@
+#  ####NOTE the virtual router needs to be hardcoded
+#  ####NOTE the virtual router needs to be hardcoded
+#  ####NOTE the virtual router needs to be hardcoded
+#- name: reads the 'build_this_interface.yml file and builds that interface'
+#  hosts: my-panorama
+#  connection: local
+#  gather_facts: False
+#
+#
+#  vars_files:
+#    - 'vars/build_this_interface.yml'
+#    - 'vars/mysecrets.yml'
+#    - 'vars/vars.yml'
+#
+#  vars:
+#    subinterface_type: 'subinterface'
+#    loopback_type: 'loopback'
+#    tunnel_type: 'tunnel'
+#
+#
+#  #{{ item.patunnel_name }}
+#  #  -e 'ansible_python_interpreter=/usr/bin/python3'
+##
+##  roles:
+##    - role: paloaltonetworks.paloaltonetworks
+#  collections:
+#    - paloaltonetworks.panos
+#  tasks:
+#    - name: make SubInterfaceL3
+#      panos_l3_subinterface:
+#        provider: '{{ PANO_Provider }}'
+#        enable_dhcp: false
+#        name: "{{ item.name }}"
+#        tag: '{{ item.vlan }}'
+#        vr_name: '{{ item.vr_name }}'
+#        management_profile: '{{ item.management_profile }}'
+#        vsys: '{{ item.vsys }}'
+#        zone_name: '{{ item.zone_name }}'
+#        ip: ["{{ item.ip }}"]
+#        template: '{{ item.template }}'
+#      loop: '{{ interfaces }}'
+#      when:
+#        - 'subinterface_type in item.interface_type'
+#
+#
+#    - name: make loopback Interface
+#      panos_loopback_interface:
+#        provider: '{{ PANO_Provider }}'
+#        if_name: "{{ item.name }}"
+#        vr_name: '{{ item.vr_name }}'
+#        management_profile: '{{ item.management_profile }}'
+#        vsys: '{{ item.vsys }}'
+#        zone_name: '{{ item.zone_name }}'
+#        ip: ["{{ item.ip }}"]
+#        template: '{{ item.template }}'
+#      loop: '{{ interfaces }}'
+#      when:
+#        - 'loopback_type in item.interface_type'
+#
+#    - name: make Tunnel
+#      panos_tunnel:
+#        provider: '{{ PANO_Provider }}'
+#        if_name: "{{ item.name }}"
+#        vr_name: '{{ item.vr_name }}'
+#        management_profile: '{{ item.management_profile }}'
+#        vsys: '{{ item.vsys }}'
+#        zone_name: '{{ item.zone_name }}'
+#        ip: ["{{ item.ip }}"]
+#        template: '{{ item.template }}'
+#      loop: '{{ interfaces }}'
+#      when:
+#        - 'tunnel_type in item.interface_type'

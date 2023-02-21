@@ -1,0 +1,111 @@
+{% extends "base_generic.html" %}
+{% block content %}
+{% load widget_tweaks %}
+<div class = 'container'>
+{% if messages %}
+  {% for message in messages %}
+     {% if message.type == 'success' %}
+      <script>
+         M.toast({html: "{{ message.message }}", classes: 'green rounded', displayLength:2000});
+      </script>
+	 {% endif %}
+	 {% if message.type == 'warning' %}
+      <script>
+         M.toast({html: "{{ message.message }}", classes: 'orange rounded', displayLength:6000});
+      </script>
+	 {% endif %}
+	 {% if message.type == 'error' %}
+      <script>
+         M.toast({ html: "{{ message.message }}", classes: 'red rounded', displayLength:20000});
+      </script>
+	 {% endif %}
+  {% endfor %}
+{% endif %}
+	{{ form.media.css }}
+
+    <style>
+        .select2-container {
+			width: 100% !important;
+		}
+    </style>
+
+<div id="error_message_div" class="center red pulse"></div>
+<div id="id_object_search_form_holder">
+
+	<div class = 'section'>
+	<form method="POST" id="search-form" >
+        {% csrf_token %}
+		{% load materializecss %}
+<!--		<div class = table>-->
+
+<!--			<table>-->
+<!--				<thead>-->
+<!--				<tr>-->
+<!--					<th style = "width:25%">Label/RITM#:</th>-->
+<!--					<th style = "width:25%">Current Server/Address</th>-->
+<!--					<th style = "width:25%">Target Server/Address</th>-->
+<!--				</tr>-->
+<!--				</thead>-->
+<!--		<tr>-->
+<!--		<td> {{ form.request_label|attr:"id:ritm_label" }} </td>-->
+<!--		<td> {{ form.current_server|attr:"id:current_server_id" }} </td>-->
+<!--		<td> {{ form.target_servers|attr:"id:clone_target_id" }} </td>-->
+<!--		</tr>-->
+<!--		</table>-->
+<!--		<br>-->
+<!--		<input type="submit" class="waves-effect waves-light btn-small" value="Find Rules" id="find_rules_button_id">-->
+<!--		</div>-->
+	<div class="row italic">
+		<p>I want to find all rule instances for {{ form.current_server|attr:"id:current_server_id" }}<br> and
+		use them to build new rules for {{ form.target_servers|attr:"id:clone_target_id" }}<br>
+		I totally have a request generated for this so Infosec can have a better look. So <b>PREPEND</b> the following labels
+		{{ form.request_label|attr:"id:ritm_label"|attr:"class:white" }}</p><br>
+
+	</div>
+		<input type="submit" class="waves-effect waves-light btn-small" value="Find Rules" id="find_rules_button_id">
+		<p>When you have selected your desired rulesets, click replicate and follow the prompts</p>
+    </form>
+	</div>
+	<br><br><br>
+	<div id="rule_table_holder_id" >
+	</div>
+</div>
+</div>
+{% load static %}
+<script type="text/javascript">
+    $('#search-form').on('submit', function(event){
+				event.preventDefault();
+				console.log("form submitted!");  // sanity check
+				getRulesforReplication();
+	});
+
+	function getRulesforReplication() {
+		  event.preventDefault();
+			M.toast({html: "attempting to Fetch some rules!- \( ﾟヮﾟ)/", classes: 'green rounded', displayLength:2000});
+			$.ajax({
+				url: "{% url 'SEARCHOBJECTGETRULES' %}",
+				type: "POST",
+				header : {'X-CSRFToken': '{{ csrf_token }}'},
+				data: {
+					'current_server_id' : $('#current_server_id').select2('val'),
+					'csrfmiddlewaretoken': '{{ csrf_token }}',
+				},
+				success: function(data) {
+						M.toast({html: "We Cloned them all - \( ﾟヮﾟ)/", classes: 'green rounded', displayLength:2000});
+						$('#rule_table_holder_id').html(data)
+				},
+				error : function(xhr,errmsg,err) {
+							M.toast({html: "SOMETHING WENT HORRIBLY WRONG", classes: 'red rounded', displayLength:6000});
+							console.log(xhr.status + ": " + xhr.responseText); // provide a bit more info about the error to the console
+				}
+			});
+
+	};
+
+
+
+</script>
+
+{{ form.media.js }}
+
+{% endblock %}

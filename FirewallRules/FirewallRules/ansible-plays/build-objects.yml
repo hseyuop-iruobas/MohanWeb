@@ -1,0 +1,52 @@
+- name: adds objects and object-groups to the Firewall
+  hosts: panorama
+  connection: local
+  gather_facts: False
+  vars_files: 
+    - 'inventory/firewall-secrets.yml'
+    - '../results/objects.yml'
+    - 'vars/vars.yml'
+
+  #{{ item.patunnel_name }}
+  #  -e 'ansible_python_interpreter=/usr/bin/python3'
+  collections:
+    - paloaltonetworks.panos
+  vars:
+    host_object_type: 'ip-netmask'
+    fqdn_object_type: 'fqdn'
+    GROUP_OBJECTS: 'address-group'
+
+    
+  tasks:
+
+  - name: Add an address object to the firewall
+    panos_address_object:
+      provider: '{{ PANO_Provider }}'
+      #device_group: '{{ item.devicegroup }}'
+      name: '{{ item.object_name }}'
+      value: '{{ item.object_value }}'
+      address_type: '{{ item.object_type }}'
+      description: '{{ item.object_description}}'
+      tag: '{{ item.object_tag }}'
+      commit: no
+    loop: "{{ objects }}"
+    loop_control:
+        label: 'adding object: {{ item.object_name }}'
+    when:
+      - 'GROUP_OBJECTS not in item.object_type'
+      
+
+  - name: Add an address group to the firewall
+    panos_address_group:
+      provider: '{{ PANO_Provider }}'
+      #device_group: '{{ item.devicegroup }}'
+      name: '{{ item.object_name }}'
+      static_value: '{{item.object_value.split(",") }}'
+      description: '{{ item.object_description }}'
+      tag: '{{ item.object_tag }}'
+      commit: no
+    loop: "{{ objects }}"
+    when:
+      - 'GROUP_OBJECTS in item.object_type'
+
+

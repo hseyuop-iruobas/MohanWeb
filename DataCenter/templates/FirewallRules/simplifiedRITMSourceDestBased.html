@@ -1,0 +1,75 @@
+{% extends "base_generic.html" %}
+{% block content %}
+<div class = 'container'>
+{% if messages %}
+  {% for message in messages %}
+     {% if message.type == 'success' %}
+      <script>
+         M.toast({html: "{{ message.message }}", classes: 'green rounded', displayLength:2000});
+      </script>
+	 {% endif %}
+	 {% if message.type == 'warning' %}
+      <script>
+         M.toast({html: "{{ message.message }}", classes: 'orange rounded', displayLength:6000});
+      </script>
+	 {% endif %}
+	 {% if message.type == 'error' %}
+      <script>
+         M.toast({ html: "{{ message.message }}", classes: 'red rounded', displayLength:20000});
+      </script>
+	 {% endif %}
+  {% endfor %}
+{% endif %}
+    <h1><center>Create a Change</center></h1>
+	{{ forms.media.css }}
+<!--    <style>-->
+
+<!--        .select2-container {-->
+<!--			width: 100% !important;-->
+<!--		}-->
+<!--    </style>-->
+    <form method="POST" >
+        {% csrf_token %}
+		{% load materializecss %}
+		<div class = table>
+		<table style = 'width:100%'>
+		<tr><th style = "width:50%">RITM/Rule Instance</th>
+		<tr>
+            <td>{{ form.RITM_NUMBER}}</td>
+
+<!--		<td> {{ form.Requests }} </td>-->
+        </tr>
+		</table>
+            <table id="id_rulset_formset_table">
+            {{ my_formset.management_form }}
+            <br>
+
+            <th style = "width:30%">Source</th>
+            <th style = "width:30%">destination</th>
+            <th style = "width:40%">services</th>
+            {% for myform in form.rulset_formset.forms %}
+              <tr>
+
+                  <td>{{ myform.source_address }}</td>
+                  <td>{{ myform.destination_address }}</td>
+                  <td>{{ myform.services }}</td>
+              </tr>
+
+            {% endfor %}
+            </table>
+
+
+
+		<br>
+        <input type="submit" value="Submit" class="waves-effect waves-light btn-small">
+		</div>
+    </form>
+
+	{% load static %}
+
+
+    {{ form.media.js }}
+</div>	
+{% endblock %}
+
+

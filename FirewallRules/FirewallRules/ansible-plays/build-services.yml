@@ -1,0 +1,33 @@
+- name: adds services to firewall reading
+  hosts: panorama
+  connection: local
+  gather_facts: False
+  vars_files: 
+    - 'inventory/firewall-secrets.yml'
+    - '../results/services.yml'
+    - 'vars/vars.yml'
+
+  #{{ item.patunnel_name }}
+  #  -e 'ansible_python_interpreter=/usr/bin/python3'
+  collections:
+    - paloaltonetworks.panos
+
+
+    
+  tasks:
+#{'service_protocol': 'TCP', 'service_name': 'TCP-DST-1812-18130', 'service_tag': '', 'service_description': '', 'service_id': 0, 'service_dest_port': '1812-18130'}
+
+  - name: Add an address object to the firewall
+    panos_service_object:
+      provider: '{{ PANO_Provider }}'
+      protocol: '{{ item.service_protocol }}'
+      name: '{{ item.service_name }}'
+      destination_port: '{{ item.service_dest_port }}'
+      description: '{{ item.service_description if (item.service_description != None) else "" }}'
+      commit: no
+    loop: "{{ services }}"
+    loop_control:
+        label: 'adding service: {{ item.service_name }}'
+
+
+

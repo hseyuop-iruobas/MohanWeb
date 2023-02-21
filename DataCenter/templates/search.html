@@ -1,0 +1,360 @@
+{% extends "base_generic.html" %}
+
+
+{% block content %}
+
+<script type="text/javascript" >
+  document.addEventListener('DOMContentLoaded', function() {
+    var elems = document.querySelectorAll('.collapsible');
+    var instances = M.Collapsible.init(elems, 'accordion');
+  });
+</script>
+<!--starts section for vlan display results !-->
+<div class = 'container'>
+{% if searched %}
+	<h1> you searched for {{ searched }}...</h1>
+	{%if vlanResults %}
+	<div class ="divider"></div>
+	<div class = "section">
+		<table id = "table_vlan_id" class="table responsive-table scroll" >
+			<thead>
+				 <tr>
+					 <th>Vlan ID</th>
+					 <th>Vlan Name</th>
+					 <th>Data Center</th>
+				</tr>
+			</thead>
+			<tbody>
+
+					{% for vlan in vlanResults %}
+					<tr>
+						<td>
+							<a style="color:blue" href="{% url 'VLANDETAILS' vlan.pk %}">{{ vlan.vlan_number }}</a>
+						</td>
+						<td>
+							 {{ vlan.vlan_name }}
+						</td>
+						<td>
+							 {{ vlan.vlan_datacenter.datacenter_Name }}
+						</td>
+					</tr>
+					{% endfor %}
+			</tbody>
+		</table>
+	</div>
+	{% endif %}
+<!--starts section for Object display results !-->
+{%if objectResults %}
+	<div class ="divider"></div>
+	<div class = "section">
+		<table id = "table_object_id" class="table responsive-table scroll" >
+			<thead>
+				 <tr>
+					 <th>Object ID</th>
+					 <th>Object Name</th>
+					 <th>Object Value</th>
+					 <th>Object Location</th>
+					 <th>Object Type</th>
+					 <th>Object Tag</th>
+					 <th>Object FW</th>
+				</tr>
+			</thead>
+			<tbody>
+
+					{% for object in objectResults %}
+					<tr>
+						<td>
+							<a style="color:blue" href="{% url 'OBJECTDETAILS' object.object_id%}">{{ object.object_id }}</a>
+						</td>
+						<td>
+							 {{ object.object_name }}
+						</td>
+						<td>
+							 {{ object.object_value }}
+						</td>
+						<td>
+							 {{ object.object_location }}
+						</td>
+						<td>
+							 {{ object.object_type }}
+						</td>
+						<td>
+							 {{ object.object_tag }}
+						</td>
+						<td>
+							 {{ object.object_firewall_interface.Firewall_Interface_virtual_router.virtual_router_firewall.firewall_Name }}
+						</td>
+					</tr>
+					{% endfor %}
+			</tbody>
+		</table>
+	</div>
+	{% endif %}
+
+{%if serviceResults %}
+	<div class ="divider"></div>
+	<div class = "section">
+		<table id = "table_service_id" class="table responsive-table scroll" >
+			<thead>
+				 <tr>
+					 <th>Service ID</th>
+					 <th>Service Name</th>
+				</tr>
+			</thead>
+			<tbody>
+
+					{% for service in serviceResults %}
+					<tr>
+						<td>
+							<a style="color:Blue" href="{% url 'SERVICEDETAILS' service.service_id%}">{{ service.service_id }}</a>
+						</td>
+						<td>
+							 {{ service.service_name }}
+						</td>
+					</tr>
+					{% endfor %}
+			</tbody>
+		</table>
+	</div>
+{% endif %}
+
+<!--starts section for security zone display results !-->
+{%if securityZonesResult %}
+	<div class ="divider"></div>
+	<div class = "section">
+		<table id = "table_securityzone_id" class="table responsive-table scroll" >
+			<thead>
+				 <tr>
+					 <th>Security Zone Name</th>
+					 <th>SecuritZone Value</th>
+					 <th>Firewall</th>
+					 <th>Firewall Interface</th>
+				</tr>
+			</thead>
+			<tbody>
+
+					{% for securityzone in securityZonesResult %}
+					<tr>
+						<td>
+							<a style="color:blue" href="{% url 'VLANDETAILS' securityzone.seczone_vlan.pk %}">{{ securityzone.seczone_name }}</a>
+						</td>
+						<td>
+							 {{ securityzone.seczone_value }}
+						</td>
+						<td>
+							 {{ securityzone.seczone_fwid }}
+						</td>
+						<td>
+							 {{ securityzone.seczone_fwinterface }}
+						</td>
+					</tr>
+					{% endfor %}
+			</tbody>
+		</table>
+	</div>
+{% endif %}
+
+<!--starts section for security zone display results !-->
+{%if ruleinstanceResults %}
+	<div class ="divider"></div>
+	<div class = "section">
+
+		<table id = "table_ruleinstance_id" class="table responsive-table scroll" >
+			<thead>
+				 <tr>
+					 <th>
+
+					 </th>
+					 <th>Rule Instance ID</th>
+					 <th>FW Rule Name</th>
+					 <th>Source</th>
+					 <th>Destination</th>
+					 <th>Service</th>
+					 <th>Application</th>
+					 <th>Schedule</th>
+					 <th>URLS</th>
+					 <th>Status</th>
+				</tr>
+			</thead>
+			<tbody>
+
+					{% for result in ruleinstanceResults %}
+					<tr>
+						<td>
+							 <p>
+							  <label>
+								<input id='{{ result.ruleinstance_primarykey }}' type="checkbox" />
+								<span></span>
+							  </label>
+							</p>
+						</td>
+						<td>
+							<a style="color:blue" href="{% url 'RITMDetails' result.ruleinstance_primarykey%}">{{ result.id }}</a>
+						</td>
+						<td>
+							 {{ result.rule_name }}
+						</td>
+						<td>
+							{% for source in result.source.all %}
+							   <p>{{ source.object_name }}</p>
+							{% endfor %}
+						</td>
+						<td>
+							{% for destination in result.dest.all %}
+							   <p>{{ destination.object_name }}</p>
+							{% endfor %}
+						</td>
+						<td>
+							{% for service in result.service.all %}
+							   <p>{{ service.service_name }}</p>
+							{% endfor %}
+						</td>
+						<td>
+							 {{ result.application }}
+						</td>
+						<td> {% if result.rule_duration != '0' %}
+							   <p> {{ result.rule_duration }}</p>
+							 {% else %}
+								<p>No Schedule</p>
+							{% endif %}
+						</td>
+						<td> {% if result.urls != '' %}
+							   <p> URLS Defined</p>
+							 {% else %}
+								<p>No URLs</p>
+							{% endif %}
+						</td>
+						<td> {% if result.isInUse %}
+							   <p> Not Ready</p>
+							 {% else %}
+								<p>Ready</p>
+							{% endif %}
+						</td>
+					</tr>
+					{% endfor %}
+			</tbody>
+		</table>
+		{% include 'FirewallRules/merge_rule_instance_modals.html' %}
+
+	</div>
+{% endif %}
+
+{%if changeResults %}
+	<div class ="divider"></div>
+	<div class = "section">
+		<table id = "table_change_id" class="table responsive-table scroll" >
+			<thead>
+				 <tr>
+					 <th>Change ID</th>
+					 <th>Change Number</th>
+					 <th>Rule Instances</th>
+				</tr>
+			</thead>
+			<tbody>
+
+					{% for change in changeResults %}
+					<tr>
+						<td>
+							<a style="color:blue" href="{% url 'CHANGEDETAILS' change.id%}">{{ change.id }}</a>
+						</td>
+						<td>
+							 {{ change.Change_Number }}
+						</td>
+						<td>
+							{% for instance in change.Requests.all %}
+							   <p><a style="color:blue" href="{% url 'RITMDetails' instance.ruleinstance_primarykey%}">{{ instance.id }}</a></p>
+							{% endfor %}
+						</td>
+					</tr>
+					{% endfor %}
+			</tbody>
+		</table>
+	</div>
+{% endif %}
+	{% else %}
+			<h1> I found <a href="https://en.wikipedia.org/wiki/Jon_Connor"> Jon </a>, stop asking</h1>
+	{% endif %}
+
+</div>
+
+<script type="text/javascript">
+	$(document).ready(function(){
+		$('#table_vlan_id').DataTable({
+		keys: true,
+		dom: 'Bfrtip',
+		lengthMenu: [[ 10, 25, 50, -1],['10 rows', '25 rows', '50 rows', 'Show All' ]],
+		buttons: ['pageLength', 'colvis', 'copy', 'csv', 'excel', 'pdf', 'print'],
+		colReorder: true,
+		select: true
+		});
+	});
+
+
+	$(document).ready(function(){
+		$('#table_object_id').DataTable({
+		keys: true,
+		dom: 'Bfrtip',
+		lengthMenu: [[ 10, 25, 50, -1],['10 rows', '25 rows', '50 rows', 'Show All' ]],
+		buttons: ['pageLength', 'colvis', 'copy', 'csv', 'excel', 'pdf', 'print'],
+		colReorder: true,
+		select: true
+		});
+	});
+
+
+	$(document).ready(function(){
+		$('#table_securityzone_id').DataTable({
+		keys: true,
+		dom: 'Bfrtip',
+		lengthMenu: [[ 10, 25, 50, -1],['10 rows', '25 rows', '50 rows', 'Show All' ]],
+		buttons: ['pageLength', 'colvis', 'copy', 'csv', 'excel', 'pdf', 'print'],
+		colReorder: true,
+		select: true
+		});
+	});
+
+	$(document).ready(function(){
+		$('#table_service_id').DataTable({
+		keys: true,
+		dom: 'Bfrtip',
+		lengthMenu: [[ 10, 25, 50, -1],['10 rows', '25 rows', '50 rows', 'Show All' ]],
+		buttons: ['pageLength', 'colvis', 'copy', 'csv', 'excel', 'pdf', 'print'],
+		colReorder: true,
+		select: true
+		});
+	});
+
+	$(document).ready(function(){
+		$('#table_ruleinstance_id').DataTable({
+		keys: true,
+		dom: 'Bfrtip',
+		lengthMenu: [[ 10, 25, 50, -1],['10 rows', '25 rows', '50 rows', 'Show All' ]],
+		buttons: ['pageLength', 'colvis', 'copy', 'csv', 'excel', 'pdf', 'print'],
+		colReorder: true,
+		select: true
+		});
+	});
+
+	$(document).ready(function(){
+		$('#table_change_id').DataTable({
+		keys: true,
+		dom: 'Bfrtip',
+		lengthMenu: [[ 10, 25, 50, -1],['10 rows', '25 rows', '50 rows', 'Show All' ]],
+		buttons: ['pageLength', 'colvis', 'copy', 'csv', 'excel', 'pdf', 'print'],
+		colReorder: true,
+		select: true
+		});
+	});
+
+	document.addEventListener('DOMContentLoaded', function() {
+        var elems = document.querySelectorAll('.modal');
+        var instances = M.Modal.init(elems, {'opacity':.5});
+      });
+	function selectall(){
+		$('.checkbox').prop('checked', $(this).prop('checked'));
+	}
+
+</script>
+
+{% endblock %}
+

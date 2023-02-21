@@ -1,0 +1,206 @@
+{% block content %}
+{% load static %}
+{% load widget_tweaks %}
+{{ form.media.css }}
+   {% if messages %}
+      {% for message in messages %}
+         {% if message.type == 'success' %}
+          <script>
+             M.toast({html: "{{ message.message }}", classes: 'green rounded', displayLength:2000});
+          </script>
+         {% endif %}
+         {% if message.type == 'warning' %}
+          <script>
+             M.toast({html: "{{ message.message }}", classes: 'orange rounded', displayLength:6000});
+          </script>
+         {% endif %}
+         {% if message.type == 'error' %}
+          <script>
+             M.toast({ html: "{{ message.message }}", classes: 'red rounded', displayLength:20000});
+          </script>
+         {% endif %}
+      {% endfor %}
+    {% endif %}
+    <style>
+        .select2-container {
+			width: 100% !important;
+		}
+    </style>
+
+<div>
+			<form method="POST" >
+				{% csrf_token %}
+				{% load materializecss %}
+				{{ form.hidden_value.as_hidden }}
+			<div class = table>
+				<table><tr><th style = "width:30%">Object Name</th><th style = "width:40%"></th><th style = "width:30%">Description</th></tr>
+					<tr>
+					<td> {{ form.object_name }} </td>
+					<td>
+					</td>
+					<td> {{ form.object_description }} </td>
+					</tr>
+				</table>
+				<table>
+			    <th style = "width:33%">Type</th><th style = "width:40%"></th><th style = "width:30%">Tag</th>
+				<tr>
+				<td> {{ form.object_type|attr:'id:object_type' }} </td>
+				<td>
+
+				</td>
+				<td> {{ form.tags }} </td>
+				</tr>
+				</table>
+				<table id = 'object_value_table'>
+					<tr>
+						<th style = "width:33%">Value</th>
+						<th></th>
+						<th></th>
+					</tr>
+					<tr>
+						<td> {{ form.object_value|attr:'id:object_value' }} </td>
+						<td>
+							<a class="btn-small waves-effect waves-light pulse btn-small" onClick="findlocation()">Guess Location</a>
+						</td>
+						<td></td>
+					</tr>
+				</table>
+
+
+
+					<br>
+			<div id="location_holder_container">
+					<table style = 'width:100%'>
+					<tr><th style = "width:30%">Location</th>
+					<tr>
+					<td> {{ form.object_location }} </td>
+					<td id="object_firewall_interface_holder"> {{ form.object_firewall_interface|attr:'id:object_firewall_interface' }} </td>
+
+					</table>
+			</div>
+				<br><br>
+				<div id="submitbutton_container">
+				<input type="submit" class="waves-effect waves-light btn-small" id = "SubmitButton" value="Make it So!">
+				</div>
+	       </div>
+
+			{{ form.media.js }}
+			</form>
+</div>
+<script type="text/javascript" >
+
+				$( window ).on("load",function() {
+					$('#submitbutton_container').hide();
+				});
+
+				document.addEventListener('DOMContentLoaded', function() {
+					var elems = document.querySelectorAll('.collapsible');
+					var instances = M.Collapsible.init(elems, 'accordion');
+				});
+
+				$("#object_name",).keyup(function(){
+					update();
+					});
+
+				function update() {
+					$("#object_description").val($('#object_name').val());
+				};
+
+				function findlocation(){
+					console.log('testfindlocationkick');
+					$.ajax({
+			    		url : "{% url 'GUESSOBJECTLOCATION' %}",
+			    		type : "POST",
+			    		header: {'X-CSRFToken': '{{ csrf_token }}'},
+			    		data : {
+			    			'object_value' : document.getElementById("object_value").value,
+			    			'object_type' : document.getElementById("object_type").value,
+			    		    'csrfmiddlewaretoken': '{{ csrf_token }}',
+			    		 },
+			    		 'dataType': 'json',
+
+			    		success : function(json) {
+				    	    console.log(json.location);
+
+				    	    $('#id_object_location').val(json.location).trigger('change')
+				    	    if (json.location == 'FW'){
+				    	    	$('#object_firewall_interface_holder').show()
+				    	    	myinterface = '<option value='+json.interface_id+'>' + json.interface_name + '</option>';
+				    	    	$('#object_firewall_interface').append(myinterface)
+				    	    	$('#object_firewall_interface').val(json.interface_id).trigger('change')
+				    	    } else {
+				    	    	$('#object_firewall_interface_holder').hide()
+				    	    }
+				    	    $('#submitbutton_container').show();
+
+				    	},
+			    		error : function(xhr,errmsg,err) {
+			    		    M.toast({html: "SOMETHING WENT HORRIBLY WRONG and I dont what it was ", classes: 'red rounded', displayLength:6000});
+	            			console.log(xhr.status + ": " + xhr.responseText); // provide a bit more info about the error to the console
+	            		}
+
+			    });
+				};
+
+				$("#id_object_type",).change(function(){
+				  if ($(this).val() == 'address-group'){
+				    $('#object_group_members_collaps').show();
+					M.toast({html: "Mohan has a different Link for that Now please use it! ʕ•́ᴥ•̀ʔっ", classes: 'red rounded', displayLength:2000});
+					M.toast({html: "Please Do not try and make an address-group here", classes: 'red rounded', displayLength:2000});
+                  }
+				 });
+				$("#id_object_type").trigger("change");
+
+				function checkPano(){
+			        console.log("starting to do something here")
+			        myobjname = document.getElementById("object_name").value
+			        M.toast({html: "On it Boss! Might take a few hold on ʕ•́ᴥ•̀ʔっ", classes: 'green rounded', displayLength:2000});
+			    	$.ajax({
+			    		url : "{% url 'GETPANOVALUEOBJECTNAMEAPI' %}",
+			    		type : "GET",
+			    		header: {'X-CSRFToken': '{{ csrf_token }}'},
+			    		data : {
+			    			'pano_object_name' : myobjname,
+			    		    'csrfmiddlewaretoken': '{{ csrf_token }}',
+			    		 },
+			    		 'dataType': 'json',
+
+			    		success : function(json) {
+				    	    console.log(json.value);
+				    	    console.log(json.tag_name);
+				    	    console.log(json.tag_dictionary);
+				    	    if (json.name == myobjname){
+				    	        document.getElementById("object_description").value = json.name;
+				    	        var object_type = document.getElementById("id_object_type");
+  		    	                $("#id_object_type").val(json.type).trigger('change');
+				    	        document.getElementById("object_value").value = json.value;
+				    	        M.toast({html: "Lucky Lucky Lucky I found it! - \( ﾟヮﾟ)/", classes: 'green rounded', displayLength:2000});
+				    	        console.log("success");
+				    	        Object.keys(json.tag_dictionary).forEach(function(key){
+				    	        	mytag = '<option value=' + key + '>' + json.tag_dictionary[key] + '</option>';
+				    	        	$("#id_tags").append(mytag);
+				    	        });
+				    	        $("#id_tags").val("");
+				    	        $("#id_tags").val(json.tag_id).trigger('change');
+
+
+
+				    	    } else{
+				    	        M.toast({html: "q(╯ᆺ╰๑) I couldn't find it!", classes: 'red rounded', displayLength:6000});
+				    	        console.log("no change allowed yet")
+
+				    	    }
+
+				    	},
+			    		error : function(xhr,errmsg,err) {
+			    		    M.toast({html: "SOMETHING WENT HORRIBLY WRONG and I dont what it was ", classes: 'red rounded', displayLength:6000});
+	            			console.log(xhr.status + ": " + xhr.responseText); // provide a bit more info about the error to the console
+	            		}
+
+			    });};
+
+
+</script>
+<link rel="stylesheet" href="{% static 'css/jquery.dataTables.min.css'%}">
+
+{% endblock %}

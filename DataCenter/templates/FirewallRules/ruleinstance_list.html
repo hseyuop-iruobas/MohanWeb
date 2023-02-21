@@ -1,0 +1,107 @@
+{% extends "base_generic.html" %}
+
+{% block content %}
+
+<div class = 'container'>
+<table>
+<tr>
+<a href="{% url 'RITMCreate' %}" class="waves-effect waves-light btn-small" style="margin:5px">Create a Rule Instance / RITM</a>
+<a class="waves-effect waves-light btn-small modal-trigger" style="margin:5px" href="#merge-modal">Merge</a>
+</tr>
+<tr></tr>
+</table>
+<p><strong> Rule Instance / RITM List</strong></p>
+  {% if ruleinstance_list %}
+
+		<div class ="divider"></div>
+	<div class = "section">
+		<table id = "table_ruleinstance_id" class="table responsive-table scroll" >
+			<thead>
+				 <tr>
+					 <th>Select</th>
+					 <th>Rule Instance Name</th>
+					 <th>FW Rule Name</th>
+					 <th>Source</th>
+					 <th>Destination</th>
+					 <th>Service</th>
+					 <th>Application</th>
+					 <th>Schedule</th>
+					 <th>URLS</th>
+				</tr>
+			</thead>
+			<tbody>
+
+					{% for result in ruleinstance_list %}
+					<tr>
+						<td>
+							 <p>
+							  <label>
+								<input id='{{ result.ruleinstance_primarykey }}' type="checkbox" />
+								<span></span>
+							  </label>
+							</p>
+						</td>
+						<td>
+							<a style="color:blue" href="{% url 'RITMDetails' result.ruleinstance_primarykey %}">{{ result.id }}</a>
+						</td>
+						<td>
+							 {{ result.rule_name }}
+						</td>
+						<td>
+							{% for source in result.source.all %}
+							   <p>{{ source.object_name }}</p>
+							{% endfor %}
+						</td>
+						<td>
+							{% for destination in result.dest.all %}
+							   <p>{{ destination.object_name }}</p>
+							{% endfor %}
+						</td>
+						<td>
+							{% for service in result.service.all %}
+							   <p>{{ service.service_name }}</p>
+							{% endfor %}
+						</td>
+						<td>
+							 {{ result.application }}
+						</td>
+						<td> {% if result.rule_duration != '0' %}
+							   <p> {{ result.rule_duration }}</p>
+							 {% else %}
+								<p>No Schedule</p>
+							{% endif %}
+						</td>
+						<td> {% if result.urls != '' %}
+							   <p> URLS Defined</p>
+							 {% else %}
+								<p>No URLs</p>
+							{% endif %}
+						</td>
+					</tr>
+					{% endfor %}
+			</tbody>
+		</table>
+	</div>
+  {% else %}
+    <p>There are no Rule Instances in Mohan??? Mohan lost DB or something.</p>
+  {% endif %} 
+</div>
+
+
+
+
+
+<script type="text/javascript">
+	$(document).ready(function(){
+		$('#table_ruleinstance_id').DataTable({
+		keys: true,
+		dom: 'Bfrtip',
+		lengthMenu: [[ 10, 25, 50, -1],['10 rows', '25 rows', '50 rows', 'Show All' ]],
+		buttons: ['pageLength', 'colvis', 'copy', 'csv', 'excel', 'pdf', 'print'],
+		colReorder: true,
+		select: true
+		});
+	});
+
+</script>
+{% endblock %}

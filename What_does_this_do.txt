@@ -1,0 +1,8 @@
+This application (full django app) makes my life of managing paloalto firewalls through panorama easier.
+once you teach it your network (and see the readme.txt file on how to teach it..) it can build you firewall rules with redundancy in mind. 
+it can also disect your logs for your end users. I've reduced 90% of the 'its the network' tickets at work by teaching my end users on how to run through a simple search. 
+it can currently build you VPN networks, however its a bit broken in the flow. I'm working on adding more / better documentation and flow there.
+it can in theory do some simple vlan work, although i've removed the plays the code itself is there. the plays were specific to arista... 
+
+the idea here is that mohan will write you the var files (YAML) needed to run Ansible playbooks to do specific things in your network. 
+although i have heavily tied it into panorama with checking URLs, objects, services and schedules... nothing says you can't write some code to cover other NGFW managment modules / plays. 

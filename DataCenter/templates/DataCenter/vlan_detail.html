@@ -1,0 +1,42 @@
+	{% extends "base_generic.html" %}
+
+
+	{% block content %} {% load static %}
+	  <div class="col s12 m7">
+		<h2 class="header">Vlan: {{ vlan.vlan_name }}</h2>
+		<div class="card horizontal teal lighten-1">
+		  <div class="card-image">
+			<img src="{% static '/images/service-item-01.png' %}">
+		  </div>
+		  <div class="card-stacked">
+			<div class="card-content">
+			  <p>
+				<h5>Security Zone / Firewall Interface Assignments Found:</h5>
+				{% if interface_query %}
+				<ul>
+				<div class="service-item">
+					{% for interface in interface_query %}
+					<li>
+						<p style="color:black">IP Address Assigned: </p><p style="color:yellow">{{ interface.Firewall_Interface_value }}</p>
+						<p style="color:black">Virtual Router Name:</p> <p style="color:yellow">{{ interface.Firewall_Interface_virtual_router }}</p>
+						<p style="color:black">Firewall Interface:</p> <p style="color:yellow">{{ interface.Firewall_Interface_name }}</p>
+						<p style="color:black">Firewall Security Zone Name Assigned:</p> <p style="color:yellow">{{ interface.Firewall_Interface_security_zone }}</p>
+
+					</li>
+					{% endfor %}
+				</div>
+				</ul>
+				</div>
+				{% else %}
+					<p> no security zones are assigned to this Vlan. Talk to your Network Admin if problem lasts more than 4 hours?</p>
+				{% endif %}
+
+			</div>
+			<div class="card-action">
+			  <a href="{% url 'index' %}">Back Home</a>
+			</div>
+		  </div>
+		</div>
+
+	{% endblock %}
+

@@ -1,0 +1,198 @@
+{% block content %}
+
+<a class="waves-effect waves-light btn-small modal-trigger" style="margin:5px" href="#merge-modal">Merge</a>
+<a class="waves-effect waves-light btn-small modal-trigger" style="margin:5px" href="#Create_a_Change_modal">Create a Change</a>
+<a class="waves-effect waves-light btn-small modal-trigger" style="margin:5px" href="#clone_my_rules">Clone Rule Instance</a>
+
+		  <div id="merge-modal" class="modal modal-fixed-footer">
+			<div class="modal-content">
+			  <h4>Merging Rule sets</h4>
+			  <p>You are about to merge multiple rule instances into one.</p>
+				<p> Mohan will consolidate all source, destination, services, urls, users.</p>
+			  <p><b>However</b>, the record with the smallest ID will win for schedule, logging profile etc.</p>
+			<br><br><br>
+				<p>If you are <b>absolutely</b> sure that you want to merge the selected Rule Instances,</p>
+				<p>then type <b>Im Sure</b> in the field below and press OK MERGE!</p>
+				<div class="row">
+				<div class="input-field col s6">
+				  <input placeholder="Im Not Sure" id="Confirmation" type="text" class="validate">
+				  <label for="Confirmation">Type: Im Sure</label>
+				</div>
+				</div>
+				<br><br><br>
+				<button class="waves-effect waves-light btn-small" id="merge_button" onClick = 'mergefunction()' style="margin:5px">OK MERGE!</button>
+				<a class="waves-effect waves-light btn-small model-close" onClick="closeMe()"  style="margin:5px">Nevermind</a>
+			</div>
+		  </div>
+
+
+	<div id="Create_a_Change_modal" class="modal modal-fixed-footer">
+			<div class="modal-content">
+			  <h4>Build a Change from RuleSets:</h4>
+			  <p style="center">You are about to Build a Change </p>
+				<p>Mohan will build a Change request from the selected rule instances</p>
+			  <p><b>However</b> mohan will <b>TRY</b> redirect you to the change request page. My script people may have figured it out</p>
+				<br><br><br>
+
+				<br><br><br>
+				<button class="waves-effect waves-light btn-small" id="make_me_a_change" onClick = 'makeChange()' style="margin:5px">Build the Change!</button>
+				<a class="waves-effect waves-light btn-small model-close" onClick="closeMe()"  style="margin:5px">Nevermind</a>
+			</div>
+	</div>
+
+<div id="clone_my_rules" class="modal modal-fixed-footer">
+			<div class="modal-content">
+			  <h4>Cloning Rules:</h4>
+			  <p style="center">You are about to Clone Rules tis means: </p>
+				<p>Mohan will create an identical (mostly) Rule Instance for every rule you have selected </p>
+				<p>Mohan will further PrePend the rules with the label you will type below. </p>
+			  <p><b>However</b> mohan will <b>NOT</b> redirect you to these rulesets. You will have to update them as desired!</p>
+				<br><br><br>
+
+				<div class="row">
+				<div class="input-field col s6">
+				  <input placeholder="Label" id="ritm_label" type="text" class="validate">
+				  <label for="Confirmation">Please Put some label here:</label>
+				</div>
+				</div>
+				<br><br><br>
+				<button class="waves-effect waves-light btn-small" id="clone_rules" onClick = 'cloneRules()' style="margin:5px">Clone These Rules</button>
+				<a class="waves-effect waves-light btn-small model-close" onClick="closeMe()"  style="margin:5px">Nevermind</a>
+			</div>
+	</div>
+<script type="text/javascript">
+	function closeMe(){
+	    $('#merge-modal').modal('close');
+	};
+	function redirectMe_to_rule(id){
+					window.location.href = "../RITM/"+id;
+				};
+	function redirectMe_to_search(id){
+					window.location.href = "../search/"+id;
+				};
+    function cloneRules() {
+		  event.preventDefault();
+
+		  var mylabel = $('#ritm_label').val()
+		  if (mylabel.length > 4){
+			var selectedValues = $('input:checkbox:checked').map(function() {
+			  return this.id;
+			}).get();
+			console.log(selectedValues);
+			M.toast({html: "I will merged them all, you will Rule them all!- \( ﾟヮﾟ)/", classes: 'green rounded', displayLength:2000});
+			$.ajax({
+				url: "{% url 'CLONETHERULES' %}",
+				type: "POST",
+				header : {'X-CSRFToken': '{{ csrf_token }}'},
+				data: {
+					'rule_list_ids' : selectedValues,
+					'rule_list_label' : document.getElementById("ritm_label").value,
+					'csrfmiddlewaretoken': '{{ csrf_token }}',
+				},
+				'dataType': 'json',
+				success: function(json) {
+
+					if (json.result == 'success'){
+						M.toast({html: "We Cloned them all - \( ﾟヮﾟ)/", classes: 'green rounded', displayLength:2000});
+						setTimeout(redirectMe_to_search(document.getElementById("ritm_label").value), 5000);
+					} else {
+						M.toast({html: "I dont know what to say? ask someone to check the logs. I failed because,", classes: 'red rounded', displayLength:6000});
+						M.toast({html: "maybe: "+ json.data , classes: 'red rounded', displayLength:6000});
+						console.log(json.data);
+					}
+				},
+				error : function(xhr,errmsg,err) {
+							M.toast({html: "SOMETHING WENT HORRIBLY WRONG", classes: 'red rounded', displayLength:6000});
+							console.log(xhr.status + ": " + xhr.responseText); // provide a bit more info about the error to the console
+				}
+			});
+			} else {
+				M.toast({html: "Need a Longer label", classes: 'green rounded', displayLength:2000});
+			}
+	};
+
+
+	function mergefunction() {
+		  event.preventDefault();
+
+		  var confirmed = $('#Confirmation').val()
+		  if (confirmed == 'Im Sure'){
+			var selectedValues = $('input:checkbox:checked').map(function() {
+			  return this.id;
+			}).get();
+			console.log(selectedValues);
+			M.toast({html: "I will merged them all, you will Rule them all!- \( ﾟヮﾟ)/", classes: 'green rounded', displayLength:2000});
+			$.ajax({
+				url: "{% url 'MERGERULEINSTANCES' %}",
+				type: "POST",
+				header : {'X-CSRFToken': '{{ csrf_token }}'},
+				data: {
+					'rule_list_ids' : selectedValues,
+					'csrfmiddlewaretoken': '{{ csrf_token }}',
+				},
+				'dataType': 'json',
+				success: function(json) {
+
+					if (json.result == 'success'){
+						M.toast({html: "We merged them all sending you to new record for review - \( ﾟヮﾟ)/", classes: 'green rounded', displayLength:2000});
+						setTimeout(redirectMe_to_rule(json.master_id), 5000);
+					} else {
+						M.toast({html: "I dont know what to say? ask someone to check the logs. I failed because,", classes: 'red rounded', displayLength:6000});
+						M.toast({html: "maybe: "+ json.data , classes: 'red rounded', displayLength:6000});
+						console.log(json.data);
+					}
+				},
+				error : function(xhr,errmsg,err) {
+							M.toast({html: "SOMETHING WENT HORRIBLY WRONG", classes: 'red rounded', displayLength:6000});
+							console.log(xhr.status + ": " + xhr.responseText); // provide a bit more info about the error to the console
+				}
+			});
+			} else {
+				M.toast({html: "you aren't Sure?", classes: 'green rounded', displayLength:2000});
+			}
+	};
+	function redirectMe_to_change(id){
+					window.location.href = "../change/"+id;
+				};
+	function makeChange() {
+		  event.preventDefault();
+		  M.toast({html: "I Will try and make a Change! - \( ﾟヮﾟ)/", classes: 'green rounded', displayLength:2000});
+		  var selectedValues = $('input:checkbox:checked').map(function() {
+			  return this.id;
+		  }).get();
+		  console.log(selectedValues);
+			$.ajax({
+				url: "{% url 'CHANGECreate' %}",
+				type: "POST",
+				header : {'X-CSRFToken': '{{ csrf_token }}'},
+				data: {
+					'requests_in_change' : selectedValues,
+					'csrfmiddlewaretoken': '{{ csrf_token }}',
+					'request_type' : 'FIREWALL_RULE',
+				},
+				'dataType': 'json',
+				success: function(json) {
+
+					if (json.result == 'success'){
+						M.toast({html: "I made a Change! - \( ﾟヮﾟ)/", classes: 'green rounded', displayLength:2000});
+						M.toast({html: "Your Change Number is: "+ json.change_number + " - \( ﾟヮﾟ)/", classes: 'green rounded', displayLength:4000});
+						setTimeout(redirectMe_to_change(json.change_id), 5000);
+					} else {
+						M.toast({html: "I dont know what to say? ask someone to check the logs. I failed because,", classes: 'red rounded', displayLength:6000});
+						M.toast({html: "maybe: "+ json.data , classes: 'red rounded', displayLength:6000});
+						console.log(json.data);
+					}
+				},
+				error : function(xhr,errmsg,err) {
+							M.toast({html: "SOMETHING WENT HORRIBLY WRONG", classes: 'red rounded', displayLength:6000});
+							console.log(xhr.status + ": " + xhr.responseText); // provide a bit more info about the error to the console
+				}
+			});
+
+};
+
+
+
+</script>
+
+{% endblock %}

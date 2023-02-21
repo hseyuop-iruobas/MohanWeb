@@ -1,0 +1,25 @@
+{% extends "base_generic.html" %}
+
+{% block content %}
+<div class = 'container'>
+
+	<div name="datacenter_option_container">
+		{% for datacenter in data_center_query %}
+			<label>
+                <input class ="with-gap" name="group1" type="radio" id="{{datacenter.id}}"
+					   hx-get="{% url 'VLANTABLEDATACENTER' datacenter.id %}"
+					   hx-target="#vlan_table_container" hx-swap="outerHTML" hx-trigger="click"
+					   hx-indicator="#warning_indicator" />
+                <span>{{ datacenter.datacenter_Name }}</span>
+            </label>
+		{% endfor %}
+    </div>
+	<div class ="htmx-indicator" id ="warning_indicator"><span><p class = "grey lighten-1 pulse">
+			Some Datacenters load slowly - the moose outfront told you right?</p></span></div>
+	<div name="vlan_table_page_container">
+
+
+			{% include 'DataCenter/vlan_table_detail_table.html' %}
+	</div>
+</div>
+{% endblock %}

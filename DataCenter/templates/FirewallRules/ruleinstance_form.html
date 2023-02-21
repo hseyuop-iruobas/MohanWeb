@@ -1,0 +1,207 @@
+{% extends "base_generic.html" %}
+{% block content %}
+{% load widget_tweaks %}
+<div class = 'container'>
+{% if messages %}
+  {% for message in messages %}
+     {% if message.type == 'success' %}
+      <script>
+         M.toast({html: "{{ message.message }}", classes: 'green rounded', displayLength:2000});
+      </script>
+	 {% endif %}
+	 {% if message.type == 'warning' %}
+      <script>
+         M.toast({html: "{{ message.message }}", classes: 'orange rounded', displayLength:6000});
+      </script>
+	 {% endif %}
+	 {% if message.type == 'error' %}
+      <script>
+         M.toast({ html: "{{ message.message }}", classes: 'red rounded', displayLength:20000});
+      </script>
+	 {% endif %}
+  {% endfor %}
+{% endif %}
+    <h1>Rule Instance</h1>
+	{{ form.media.css }}
+    <style>
+        .select2-container {
+			width: 100% !important;
+		}
+    </style>
+	<div id="error_message_div" class="center red pulse"></div>
+    <form method="POST" action="/create_ritm" id="post-form">
+        {% csrf_token %}
+		{% load materializecss %}
+		<div class = table>
+        <table>
+			<tr style = "height:20px">
+				<th style = "width:30%">Request Number</th>
+				<th style = "width:3%"></th>
+				<th style = "width:30%">Rule Name</th>
+				<th style = "width:3%"></th>
+				<th style = "width:30%">Rule Description</th>
+			</tr>
+		<tr style = "height:20px">
+			<td class = 'grey lighten-5 z-depth-1'  style = "height:10px"> {{ form.id|attr:"id:rule_id" }} </td>
+			<td></td>
+			<td class = 'grey lighten-5 z-depth-1'  style = "height:10px"> {{ form.rule_name|attr:"id:rule_name" }} </td>
+			<td></td>
+			<td class = 'grey lighten-5 z-depth-1'  style = "height:10px"> {{ form.rule_description|attr:"id:rule_description" }} </td>
+		</tr>
+		</table>	
+		<table style = 'width:100%'>
+		<tr>
+			<th style = "width:30%">Sources:</th>
+			<th style = "width:3%"></th>
+			<th style = "width:30%">Destinations:</th>
+			<th style = "width:3%"></th>
+			<th style = "width:30%">Services</th>
+		</tr>
+		<tr>
+			<td class = 'grey lighten-5 z-depth-1'> {{ form.source|attr:"id:rule_sources" }} </td>
+			<td></td>
+			<td class = 'grey lighten-5 z-depth-1'> {{ form.dest|attr:"id:rule_destinations" }} </td>
+			<td></td>
+			<td class = 'grey lighten-5 z-depth-1'> {{ form.service|attr:"id:rule_services" }} </td>
+		</tr>
+		</table>
+		<br>
+		<div name ='optional fields'>
+			<ul class="collapsible">
+    			<li>
+					<div class="collapsible-header">Additional Fields: (Optional)</div>
+					<div class="collapsible-body">
+						<span>
+							<table class="responsive-table">
+								<tr><td><b>Applications:</b> {{ form.application|add_class:"grey lighten-5 z-depth-1" |attr:"id:rule_applications" }}<br></td>
+								<td><b>Users:</b>  {{ form.source_user|add_class:"grey lighten-5 z-depth-1" |attr:"id:rule_users" }}<br></td></tr>
+								<tr><td><b>Schedule:</b>  {{ form.rule_duration|add_class:"grey lighten-5 z-depth-1" |attr:"id:rule_schedule"  }}</td>
+								<td><div id ="start_date_table" name="start_date_table"><b>Start Date:</b>{{ form.start_date|add_class:"grey lighten-5 z-depth-1"  |attr:"id:rule_start_date" }}<br>
+								</div></td></tr>
+								<tr><b>URLS:</b>  {{ form.urls|add_class:"grey lighten-5 z-depth-1"  |attr:"id:rule_urls" }}<br></tr>
+							</table>
+						</span>
+					</div>
+				</li>
+			</ul>
+		</div>
+
+		
+		<br>
+        <input type="submit" value="Submit" class="waves-effect waves-light btn-small" id="form_submit_button" name="form_submit_button">
+
+		</div>
+    </form>
+	
+	{% load static %}
+
+    <script type="text/javascript" >
+			     $( window ).on("load", function() {
+				   if ($("#rule_schedule").val() == '0') {
+			          $('#rule_start_date').hide();
+					  $('#initial-rule_start_date').hide();
+					  $('#start_date_table').hide();
+					  
+					  
+			       }
+			    });
+				document.addEventListener('DOMContentLoaded', function() {
+					var elems = document.querySelectorAll('.collapsible');
+					var instances = M.Collapsible.init(elems, 'accordion');
+				});
+
+				$("#rule_name",).keyup(function(){
+					updateDescription();
+					});
+				
+				function updateDescription() {
+					$("#rule_description").val($('#rule_name').val());
+				};
+				$("#rule_id",).keyup(function(){
+					IncludeRITMinName();
+					});
+				
+				function IncludeRITMinName() {
+					$("#rule_name").val($('#rule_id').val());
+				};
+
+				function redirectMe(id){
+					window.location.href = "../"+id;
+				};
+				
+				$("#rule_schedule",).change(function(){
+				  if ($(this).val() != '0'){
+				     $('#start_date_table').show();
+					 $('#initial-id_start_date').show();
+					 $('#rule_start_date').show();
+                  } else {					 
+				     $('#start_date_table').hide();
+					 $('#initial-id_start_date').hide();
+					 $('#rule_start_date').hide();
+			      }
+				 });
+				$("#id_rule_duration").trigger("change");
+
+
+				$('#post-form').on('submit', function(event){
+				event.preventDefault();
+				console.log("form submitted!")  // sanity check
+				M.toast({html: "I've posted your request - may take a few to get the result!", classes: 'green rounded', displayLength:2000});
+				$.ajax({
+					url : "{% url 'RITMCreate' %}",
+					type: "POST",
+					header: {'X-CSRFToken': '{{ csrf_token }}'},
+					data: {
+						'rule_id': document.getElementById("rule_id").value,
+						'rule_name': document.getElementById("rule_name").value,
+						'rule_description': document.getElementById("rule_description").value,
+						'rule_sources': $('#rule_sources').select2('val'),
+						'rule_destinations': $('#rule_destinations').select2('val'),
+						'rule_services': $('#rule_services').select2('val'),
+						'rule_applications': document.getElementById("rule_applications").value,
+						'rule_users': document.getElementById("rule_users").value,
+						'rule_urls': document.getElementById("rule_urls").value,
+						'rule_start_date': document.getElementById("rule_start_date").value,
+						'rule_schedule': document.getElementById("rule_schedule").value,
+						'csrfmiddlewaretoken': '{{ csrf_token }}',
+						{% if action == 'update' %}
+						'action':'update',
+						'ruleinstance_primarykey': {{ ruleinstance_primarykey }},
+						{% else %}
+						'action': 'create',
+						{% endif %}
+					},
+					'dataType': 'json',
+					success : function(json) {
+				    	    console.log(json.result);
+				    	    if (json.result == 'success'){
+				    	        $('#view_record_button').show();
+				    	        M.toast({html: "View the record and check the rules I think I should build - \( ﾟヮﾟ)/", classes: 'green rounded', displayLength:2000});
+				    	        console.log("success");
+				    	        console.log(json.rule_id);
+				    	        M.toast({html: "Im Going to Transition you to next page in 5 seconds", classes: 'green rounded', displayLength:2000});
+				    	        setTimeout(redirectMe(json.rule_id), 5000);
+
+				    	    } else {
+				    	        M.toast({html: "( ・◇・)？something went wrong with this request. Check the console logs (f12)", classes: 'red rounded', displayLength:6000});
+				    	        M.toast({html: "( ・◇・)？Actually the backend says: "+ json.data, classes: 'red rounded', displayLength:6000});
+				    	        $('#error_message_div').append("<p>"+json.data+"</p>");
+				    	        console.log(json.data);
+				    	        $('#view_record_button').hide();
+				    	    }
+
+				    },
+					error : function(xhr,errmsg,err) {
+						M.toast({html: "SOMETHING WENT HORRIBLY WRONG", classes: 'red rounded', displayLength:6000});
+						console.log(xhr.status + ": " + xhr.responseText); // provide a bit more info about the error to the console
+					}
+					});});
+
+			</script>
+	
+	
+	{{ form.media.js }}
+</div>	
+{% endblock %}
+
+

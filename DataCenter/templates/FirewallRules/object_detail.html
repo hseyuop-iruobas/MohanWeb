@@ -1,0 +1,190 @@
+{% extends "base_generic.html" %}
+
+{% block content %}
+
+<div class="container">
+<h4>Object/Address - Details</h4>
+<div class = "row">
+<div class = "col s6">
+{% if object.object_type == 'address-group' %}
+	<a href="{% url 'OBJECTupdate' object.object_id %}" class="waves-effect waves-light btn-small">Update this Object</a>
+{% else %}
+	<a href="{% url 'OBJECTupdate' object.object_id %}" class="waves-effect waves-light btn-small">Update this Object</a>
+{% endif %}
+</div>
+<div class = 'col s6' align="right"><a class="btn-small  waves-effect waves-light modal-trigger" href="#orange">Push This Data to Panorama</a></div>
+</div>
+
+<table class = 'table'>
+<tr>
+<th>Name</th><th>Value</th><th>Type</th>
+</tr>
+<tr>
+<td>{{ object.object_name }}</td>
+<td>{{ object.object_value }}</td>
+<td>{{ object.object_type }}</td>
+</tr>
+</table><br>
+
+<table>
+<tr>
+<th>Description</th><th>Location</th><th>Tag</th>
+</tr>
+<tr>
+<td>{{ object.object_description }}</td>
+
+<td>{{ object.object_location }}</td>
+<td>
+	{% for tg in object.tags.all %}
+	{{ tg }}
+	{% endfor %}
+</td>
+</tr>
+</table>
+<br>
+{%if object.object_type != 'address-group' %}
+<table>
+<tr>
+<ul class="collapsible">
+    <li>
+      <div class="collapsible-header">Additional Details  </div>
+      <div class="collapsible-body">
+	  <p><span>Object Firewall: <strong>{{ object.object_firewall_interface.Firewall_Interface_security_zone.security_zone_firewall  }}</strong></span></p>
+	  <p><span>Security Zone: <strong>
+		  {% if object.object_firewall_interface.Firewall_Interface_vlan %}
+		  	<a href="{% url 'VLANDETAILS' object.object_firewall_interface.Firewall_Interface_vlan.id %}">
+		  {% endif %}
+				{{ object.object_firewall_interface.Firewall_Interface_security_zone }}</a></strong></span></p>
+	  <p><span>Tag: {% for tag in object.tags.all %} {{ tag.tag_name }} {% endfor %}</span></p>
+	  </div>
+    </li>
+</ul>
+</tr>
+</table>
+{% endif %}
+
+{%if object.object_type == 'address-group' %}
+<ul class="collapsible">
+    <li>
+
+      <div class="collapsible-header" hx-get="{% url 'GETADDRESSGROUPDETAIL'  object.object_id %}" hx-target="#object_group_holder" hx-swap="innerHTML " hx-trigger="click">Object Group Members  </div>
+      <div class="collapsible-body">
+		<div id="object_group_holder"></div>
+	  </div>
+    </li>
+</ul>
+<ul class="collapsible">
+	<li>
+	 <div class="collapsible-header" hx-get="{% url 'GETPANOOBJECTGROUPNAME'  object.object_name %}" hx-target="#div_pano_object_view" hx-swap="innerHTML " hx-trigger="click">Current Panorama Data:</div>
+      <div class="collapsible-body"><span>
+	  <div class = 'container'>
+
+		  {% include 'FirewallRules/pano_object_detail.html' %}
+
+	  </div>
+	  </span></div></li>
+</ul>
+
+{% else %}
+<ul class="collapsible">
+	<li>
+	 <div class="collapsible-header" hx-get="{% url 'GETPANOOBJECTNAME'  object.object_name %}" hx-target="#div_pano_object_view" hx-swap="innerHTML " hx-trigger="click">Current Panorama Data:</div>
+      <div class="collapsible-body"><span>
+	  <div class = 'container'>
+
+		  {% include 'FirewallRules/pano_object_detail.html' %}
+
+	  </div>
+	  </span></div></li>
+</ul>
+{% endif %}
+</div>
+
+
+<!--THIS SECTION Is USED FOR MODALS-->
+
+ <div id="orange" class="modal modal-fixed-footer">
+    <div class="modal-content">
+      <h4>Push Data to Panorama</h4>
+      <p>Note you need to have a valid T1 with WRITE access to utilize this feature</p>
+	  <p>God Speed and good Luck </p>
+		<p>Also Remember Mohan doesn't Commit and push, you need to do that in Panorama </p>
+	<table>
+		<thead>
+		<tr>
+			<th>Username</th>
+			<th></th>
+			<th>Password</th>
+		</tr>
+		</thead>
+		<tbody>
+		<tr>
+			<td>  <input type="text" id="pano_username" name="fname"></td>
+			<td></td>
+			<td><input type="password" id="pano_password" name="pwd"></td>
+		</tr>
+		</tbody>
+	</table>
+		<br>
+
+		<button class="waves-effect waves-light btn-small" onclick="PushObjectToPano()">
+
+                    I have the Power
+    </button>
+    </div>
+  </div>
+
+<script type="text/javascript" >
+  document.addEventListener('DOMContentLoaded', function() {
+    var elems = document.querySelectorAll('.collapsible');
+    var instances = M.Collapsible.init(elems, 'accordion');
+  });
+  document.addEventListener('DOMContentLoaded', function() {
+    var elems = document.querySelectorAll('.modal');
+    var instances = M.Modal.init(elems, {'opacity':.5});
+  });
+
+  function PushObjectToPano(){
+			        console.log("starting to do something here like pusthing stuff")
+			        pano_username = document.getElementById("pano_username").value
+			        pano_password = document.getElementById("pano_password").value
+			        M.toast({html: "On it Boss! Might take a few hold on ʕ•́ᴥ•̀ʔっ", classes: 'green rounded', displayLength:2000});
+			        M.toast({html: "Remember to Check pano After", classes: 'green rounded', displayLength:2000});
+			    	$.ajax({
+			    		url : "{% url 'PUSHOBJECTFROMDBTOPANORAMA' %}",
+			    		type : "POST",
+			    		header: {'X-CSRFToken': '{{ csrf_token }}'},
+			    		data : {
+			    			'object_id' : {{object.object_id}},
+			    			'pano_username' : pano_username,
+			    			'pano_password' : pano_password,
+			    			'object_type' : '{{object.object_type}}',
+			    		    'csrfmiddlewaretoken': '{{ csrf_token }}',
+			    		 },
+			    		 'dataType': 'json',
+
+			    		success : function(json) {
+				    	    console.log(json.message);
+				    	    if (json.message == '200'){
+				    	        M.toast({html: "We Did it!, I mean I DID IT! \( ﾟヮﾟ)/", classes: 'green rounded', displayLength:2000});
+				    	        console.log("success");
+
+
+
+				    	    } else{
+
+				    	        M.toast({html: "q(╯ᆺ╰๑) I couldn't do it, Server says: " + json.answer.message, classes: 'red rounded', displayLength:6000});
+				    	        console.log(json.answer);
+				    	    }
+
+				    	},
+			    		error : function(xhr,errmsg,err) {
+			    		    M.toast({html: "SOMETHING WENT HORRIBLY WRONG and I dont what it was ", classes: 'red rounded', displayLength:6000});
+	            			console.log(xhr.status + ": " + xhr.responseText); // provide a bit more info about the error to the console
+	            		}
+
+			    });};
+
+</script>
+
+{% endblock %}

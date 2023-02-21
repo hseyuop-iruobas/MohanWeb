@@ -1,0 +1,82 @@
+{% extends "base_generic.html" %}
+{% block content %}
+
+<div class = 'container'>
+<table>
+<tr>
+<a href="{% url 'CHANGECreate' %}" class="waves-effect waves-light btn-small">Create a Change</a>
+</tr>
+<tr></tr>
+</table>
+<p><strong> Change List </strong></p>
+  {% if change_list %}
+
+		<table  id = "table_change_id" class="table responsive-table scroll" >
+		<thead>
+			<tr><th>Change ID (Internal)</th><th>Change Number</th><th>Change Date</th><th>Owner</th><th>Status</th></tr>
+		</thead>
+		{% for change in change_list %}
+		   {% if change.change_status == 'Complete' %}
+		         <tr class = "green lighten-4">
+					 <td><a href="{% url 'CHANGEDETAILS' change.id %}">{{ change.id }}</a></td>
+		    	   <td><a href="{% url 'CHANGEDETAILS' change.id %}">{{ change.Change_Number }}</a></td>
+		    	   <td>{{ change.creation_date }}</td>
+		    	   <td>{{ change.db_created_by }}</td>
+				   <td>{{ change.change_status }}</td>
+		        </tr>
+		   {% endif %}
+
+		   {% if change.change_status == 'Started' %}
+		         <tr class = "yellow">
+					 <td><a href="{% url 'CHANGEDETAILS' change.id %}">{{ change.id }}</a></td>
+		    	   <td><a href="{% url 'CHANGEDETAILS' change.id %}">{{ change.Change_Number }}</a></td>
+		    	   <td>{{ change.creation_date }}</td>
+		    	   <td>{{ change.db_created_by }}</td>
+				   <td>{{ change.change_status }}</td>
+		        </tr>
+		   {% endif %}
+		
+		   {% if change.change_status == 'Not Started' %}
+		         <tr class = "purple lighten-4">
+					 <td><a href="{% url 'CHANGEDETAILS' change.id %}">{{ change.id }}</a></td>
+		    	     <td><a href="{% url 'CHANGEDETAILS' change.id %}">{{ change.Change_Number }}</a></td>
+		    	     <td>{{ change.creation_date }}</td>
+		    	     <td>{{ change.db_created_by }}</td>
+					 <td>{{ change.change_status }}</td>
+		        </tr>
+		   {% endif %}
+			{% if change.change_status == 'ERROR' %}
+		         <tr class = "orange">
+					 <td><a href="{% url 'CHANGEDETAILS' change.id %}">{{ change.id }}</a></td>
+		    	     <td><a href="{% url 'CHANGEDETAILS' change.id %}">{{ change.Change_Number }}</a></td>
+		    	     <td>{{ change.creation_date }}</td>
+		    	     <td>{{ change.db_created_by }}</td>
+					 <td>{{ change.change_status }}</td>
+		        </tr>
+		   {% endif %}
+				
+
+		
+		
+		{% endfor %}
+		</table></a>
+
+  {% else %}
+    <p>There are no Changes in Mohan??? Mohan lost DB or something.</p>
+  {% endif %} 
+</div>
+
+<script type="text/javascript">
+	$(document).ready(function(){
+		$('#table_change_id').DataTable({
+		keys: true,
+		dom: 'Bfrtip',
+		lengthMenu: [[ 10, 25, 50, -1],['10 rows', '25 rows', '50 rows', 'Show All' ]],
+		buttons: ['pageLength', 'colvis', 'copy', 'csv', 'excel', 'pdf', 'print'],
+		colReorder: true,
+		select: true,
+		order: [0,'desc']
+		});
+	});
+</script>
+{% endblock %}

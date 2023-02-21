@@ -1,0 +1,57 @@
+{% extends "base_generic.html" %}
+{% block content %}
+<div class = 'container'>
+{% if messages %}
+  {% for message in messages %}
+     {% if message.type == 'success' %}
+      <script>
+         M.toast({html: "{{ message.message }}", classes: 'green rounded', displayLength:2000});
+      </script>
+	 {% endif %}
+	 {% if message.type == 'warning' %}
+      <script>
+         M.toast({html: "{{ message.message }}", classes: 'orange rounded', displayLength:6000});
+      </script>
+	 {% endif %}
+	 {% if message.type == 'error' %}
+      <script>
+         M.toast({ html: "{{ message.message }}", classes: 'red rounded', displayLength:20000});
+      </script>
+	 {% endif %}
+  {% endfor %}
+{% endif %}
+    <h1><center>Get Vlans From Switch<br> and put it in m'ah DB</center></h1>
+	{{ form.media.css }}
+    <style>
+        .select2-container {
+			width: 100% !important;
+		}
+    </style>
+    <form method="POST" >
+        {% csrf_token %}
+		{% load materializecss %}
+		<div class = table>
+        <table><tr><th style = "width:50%">Switch Name</th></tr>
+		<tr>
+		<td> {{ form.switch_name_to_pull }} </td>
+		</table>	
+		<table><tr><th style = "width:33%">Switch Username</th><th style = "width:34%"></th><th style = "width:33%">Switch Password</th></tr>
+		<tr>
+		<td> {{ form.switch_username }} </td>
+		<td> </td>
+		<td> {{ form.switch_password }} </td>
+		</table>
+		
+		<br>
+        <input type="submit" value="Submit"  class="waves-effect waves-light btn-small">
+		</div>
+    </form>
+	
+	{% load static %}
+
+
+    {{ form.media.js }}
+</div>	
+{% endblock %}
+
+
