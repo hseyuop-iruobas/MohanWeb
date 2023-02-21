@@ -1,0 +1,15 @@
+{% block content %}
+<table>
+		<tr><th>ID</th><th>Name</th><th>Location</th><th>Type</th></tr>
+
+		{%for objectmember in object.object_group_members.all %}
+			<tr>
+				<td><a href="{% url 'OBJECTDETAILS' objectmember.object_id %}">{{ objectmember.object_id }}</a></td>
+				<td><a href="{% url 'OBJECTDETAILS' objectmember.object_id %}">{{ objectmember.object_name }}</a></td>
+				<td>{{ objectmember.object_location }}</a></td>
+				<td>{{ objectmember.object_type }}</a></td>
+			</tr>
+		{% endfor %}
+
+</table>
+{% endblock %}

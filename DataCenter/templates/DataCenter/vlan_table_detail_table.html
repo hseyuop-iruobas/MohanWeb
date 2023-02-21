@@ -1,0 +1,43 @@
+{% block content %}
+
+<div id="vlan_table_container">
+	<h5>Found {{ vlan_dictionary_list_count }} Vlans in {{data_center_instance.datacenter_Name}}</h5>
+	{% if vlan_dictionary_list %}
+
+    <table  class="table responsive-table scroll highlight responsive-table teal lighten-5" id = "table_vlan_id" >
+		<thead>
+		<tr>
+
+		<th>Vlan Name</th><th>Vlan Number</th><th>Gateway/Mask</th>
+
+		</tr>
+		</thead>
+    {% for value in vlan_dictionary_list %}
+		<tr>
+		    <td>{{ value.vlan_name }}</td>
+		  	<td>{{ value.vlan_number }}</td>
+			<td>{{ value.ip_address }}</td>
+		</tr>
+    {% endfor %}
+	</table>
+  {% else %}
+    <p>Select a Different Datacenter?</p>
+  {% endif %}
+
+</div>
+<script type="text/javascript">
+	$(document).ready(function(){
+		$('#table_vlan_id').DataTable({
+		keys: true,
+		dom: 'Bfrtip',
+		lengthMenu: [[ 10, 25, 50, -1],['10 rows', '25 rows', '50 rows', 'Show All' ]],
+		buttons: ['pageLength', 'colvis', 'copy', 'csv', 'excel', 'pdf', 'print'],
+		colReorder: true,
+		select: true,
+
+		});
+	});
+</script>
+
+
+{% endblock %}

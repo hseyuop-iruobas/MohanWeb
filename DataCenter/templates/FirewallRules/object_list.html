@@ -1,0 +1,53 @@
+{% extends "base_generic.html" %}
+{% block content %}
+<div class = 'container'>
+<p><strong> Object List</strong></p>
+  {% if object_list %}
+
+
+	<div class = "section">
+		<table id = "my_table_object_id" class="table responsive-table scroll" >
+			<thead>
+				 <tr>
+					 <th>Object Name</th>
+					 <th>Object Location</th>
+					 <th>Object Type</th>
+				</tr>
+			</thead>
+			<tbody>
+					{% for object in object_list %}
+					<tr>
+						<td>
+							 <a style="color:blue" href="{{ object.object_id }}">{{ object.object_name}}</a>
+						</td>
+						<td>
+							 {{ object.object_location }}
+						</td>
+						<td>
+							 {{ object.object_type }}
+						</td>
+					</tr>
+					{% endfor %}
+			</tbody>
+		</table>
+	</div>
+  {% else %}
+    <p>There are no Object in the datacenter??? something has gone horribly wrong</p>
+  {% endif %}
+</div>
+</div>
+
+<script type="text/javascript">
+	$(document).ready(function(){
+		$('#my_table_object_id').DataTable({
+		keys: true,
+		dom: 'Bfrtip',
+		lengthMenu: [[ 10, 25, 50, -1],['10 rows', '25 rows', '50 rows', 'Show All' ]],
+		buttons: ['pageLength', 'colvis', 'copy', 'csv', 'excel', 'pdf', 'print'],
+		colReorder: true,
+		select: true
+		});
+	});
+</script>
+
+{% endblock %}

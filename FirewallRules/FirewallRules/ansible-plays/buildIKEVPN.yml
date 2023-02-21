@@ -1,0 +1,76 @@
+- name: adds VPN configuration for Palo Firewalls
+  hosts: my-panorama
+  connection: local
+  gather_facts: False
+
+
+  #{{ item.patunnel_name }}
+  #  -e 'ansible_python_interpreter=/usr/bin/python3'
+
+  vars_files:
+    - 'inventory/firewall-secrets.yml'
+    - '../results/vpnsettings.yml'
+    - 'vars/vars.yml'
+
+
+  collections:
+    - paloaltonetworks.panos
+
+
+  tasks:
+
+
+############# ADD TUNNEL INTERFACES ####################
+
+  - name: Create Tunnel Interface on firewall
+    panos_tunnel:
+      provider: '{{ PANO_Provider }}'
+      if_name: '{{ item.tunnel_number }}'
+      ip: ["{{ item.tunnel_address }}"]
+      vr_name: "{{item.tunnel_virtual_router}}"
+      zone_name: "{{item.zone_name }}"
+      commit: 'False'
+      template: '{{ item.targettemplate }}'
+      management_profile: ping
+    with_items: '{{ vpnsettings }}'
+
+
+
+############# ADD ike GATEWAYS ####################
+
+  - name: Add IKE gateway config to the firewall
+    panos_ike_gateway:
+      template: '{{ item.targettemplate }}'
+      provider: '{{ PANO_Provider }}'
+      state: 'present'
+      name: '{{ item.ike_gateway_name }}'
+      protocol_version: 'ikev2'
+      interface: '{{ item.front_door_interface }}'
+     # local_ip_address:  '{{ item.front_door_address }}'
+      peer_ip_value: '{{ item.peer_outside_address }}'
+      #psk: '{{item.psk}}' #going to make an api call possibly
+      ikev2_crypto_profile: '{{item.crypto_profile}}'
+      commit: 'False'
+      peer_id_type: 'ipaddr'
+      peer_id_value: '{{ item.peer_outside_address }}'
+      local_id_type: 'ipaddr'
+      local_id_value: '{{ item.front_door_interface_value }}'
+    with_items: '{{ vpnsettings }}'
+
+
+
+############# ADD ipsec TUNNELS ####################
+
+
+  - name: Add IPSec tunnel to IKE gateway profile on thfirewall
+    panos_ipsec_tunnel:
+      template: '{{ item.targettemplate }}'
+      provider: '{{ PANO_Provider }}'
+      state: 'present'
+      name: '{{ item.ike_gateway_name }}'
+      tunnel_interface: '{{ item.tunnel_number }}'
+      ike_gtw_name: '{{ item.ike_gateway_name }}'
+      ipsec_profile: '{{item.ipsec_profile}}'
+      commit: 'false'
+    with_items: '{{ vpnsettings }}'
+

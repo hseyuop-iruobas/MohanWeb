@@ -1,0 +1,82 @@
+{% block content %}
+    {% if messages %}
+      {% for message in messages %}
+         {% if message.type == 'success' %}
+          <script>
+             M.toast({html: "{{ message.message }}", classes: 'green rounded', displayLength:2000});
+          </script>
+         {% endif %}
+         {% if message.type == 'warning' %}
+          <script>
+             M.toast({html: "{{ message.message }}", classes: 'orange rounded', displayLength:6000});
+          </script>
+         {% endif %}
+         {% if message.type == 'error' %}
+          <script>
+             M.toast({ html: "{{ message.message }}", classes: 'red rounded', displayLength:20000});
+          </script>
+         {% endif %}
+      {% endfor %}
+    {% endif %}
+
+    <div id="div_pano_object_view"></div>
+{% if matched_dictionary %}
+	<div class = "section">
+		<table id = "table_pano_object_view" class="table responsive-table scroll" >
+			<thead>
+				 <tr>
+					 <th>Name</th>
+					 <th>Description</th>
+					 <th>Value</th>
+					 <th>Type</th>
+                     <th>tags</th>
+                     {% if matched_dictionary.type == 'address-group' %}
+                     <th>Members</th>
+                     {% endif %}
+				</tr>
+			</thead>
+			<tbody>
+
+
+					<tr>
+						<td>
+							{{ matched_dictionary.name }}
+						</td>
+						<td>
+							 {{ matched_dictionary.description }}
+						</td>
+						<td>
+
+                            {{ matched_dictionary.value }}
+
+						</td>
+						<td>
+
+                            {{ matched_dictionary.type }}
+						</td>
+                        <td>
+							 {{ matched_dictionary.tag }}
+						</td>
+                        {% if matched_dictionary.type == 'address-group' %}
+                        <td>
+                            {% for member in matched_dictionary.members %}
+                               <p><a style="color:blue" href="{{ member.object_id }}">{{ member.object_name}}</a></p>
+                            {% endfor %}
+                        </td>
+                        {% endif %}
+					</tr>
+
+			</tbody>
+		</table>
+	</div>
+{% endif %}
+
+
+
+
+	{% load static %}
+
+	<script type="text/javascript" src="{% static 'js/django_select2.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/jquery.min.js' %}"></script>
+
+{% endblock %}

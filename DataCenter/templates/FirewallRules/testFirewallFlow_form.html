@@ -1,0 +1,73 @@
+{% extends "base_generic.html" %}
+{% block content %}
+<div class = 'container'>
+{% if messages %}
+  {% for message in messages %}
+     {% if message.type == 'success' %}
+      <script>
+         M.toast({html: "{{ message.message }}", classes: 'green rounded', displayLength:2000});
+      </script>
+	 {% endif %}
+	 {% if message.type == 'warning' %}
+      <script>
+         M.toast({html: "{{ message.message }}", classes: 'orange rounded', displayLength:6000});
+      </script>
+	 {% endif %}
+	 {% if message.type == 'error' %}
+      <script>
+         M.toast({ html: "{{ message.message }}", classes: 'red rounded', displayLength:20000});
+      </script>
+	 {% endif %}
+  {% endfor %}
+{% endif %}
+    <h1>Request a Firewall Flow Test</h1>
+	{{ form.media.css }}
+    <style>
+        .select2-container {
+			width: 100% !important;
+		}
+    </style>
+    <form method="POST" >
+        {% csrf_token %}
+		{% load materializecss %}
+		<table><tr><th style = "width:33%">Panorama Username</th><th style = "width:34%"></th><th style = "width:33%">Panorama Password</th></tr>
+		<tr>
+		<td> {{ form.pano_username }} </td>
+		<td> </td>
+		<td> {{ form.pano_password }} </td>
+		</table>
+		<div class = table>
+        <table style = 'width:100%'>
+		<tr><th style = "width:49%">Source</th><th></th><th style = "width:49%">Destination</th>
+		<tr>
+		<td class = 'grey lighten-5 z-depth-1'> {{ form.source }} </td>
+		<td></td>
+		<td class = 'grey lighten-5 z-depth-1'> {{ form.dest }} </td>
+		
+		</table>
+
+        <table><tr><th style = "width:32%"></th><th style = "width:32%">Service</th><th style = "width:32%"></th></tr>
+		<tr>
+			<td></td>
+			<h6><strong>Only use services with name that includes -DST- for example TCP-DST-443 OR UDP-DST-53</strong></h6>
+			<h6><strong>Otherwise Things will go BOOM</strong></h6>
+			<td class = 'grey lighten-5 z-depth-1'> {{ form.service }} </td>
+			<td></td>
+		</tr>
+		</table>
+
+
+		
+		<br>
+        <input type="submit" class="waves-effect waves-light btn-small">
+		</div>
+    </form>
+	
+	{% load static %}
+
+
+	{{ form.media.js }}
+</div>	
+{% endblock %}
+
+

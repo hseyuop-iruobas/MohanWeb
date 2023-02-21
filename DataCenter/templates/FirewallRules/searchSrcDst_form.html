@@ -1,0 +1,87 @@
+{% extends "base_generic.html" %}
+{% block content %}
+<div class = 'container'>
+{% if messages %}
+  {% for message in messages %}
+     {% if message.type == 'success' %}
+      <script>
+         M.toast({html: "{{ message.message }}", classes: 'green rounded', displayLength:2000});
+      </script>
+	 {% endif %}
+	 {% if message.type == 'warning' %}
+      <script>
+         M.toast({html: "{{ message.message }}", classes: 'orange rounded', displayLength:6000});
+      </script>
+	 {% endif %}
+	 {% if message.type == 'error' %}
+      <script>
+         M.toast({ html: "{{ message.message }}", classes: 'red rounded', displayLength:20000});
+      </script>
+	 {% endif %}
+  {% endfor %}
+{% endif %}
+    <h1><center>Query Logs / Diagnose my issue</center></h1>
+	{{ form.media.css }}
+    <style>
+        .select2-container {
+			width: 100% !important;
+		}
+    </style>
+    <form method="POST" >
+        {% csrf_token %}
+		{% load materializecss %}
+<!--		<div class = table>-->
+<!--			<P> Do <font color = "red">NOT</font> select multiple addresses or Mohan will not complete task </P>-->
+<!--			<table>-->
+<!--				<thead>-->
+<!--				<tr>-->
+<!--					<th style = "width:25%">Source Address</th>-->
+<!--					<th style = "width:25%">Destination Address</th>-->
+<!--					<th style = "width:25%">Port (0 to show all)</th>-->
+<!--					<th style = "width:25%">Start Date</th>-->
+<!--				</tr>-->
+<!--				</thead>-->
+<!--		<tr></tr>-->
+<!--		<td> {{ form.source_address }} </td>-->
+
+<!--		<td> {{ form.destination_address }} </td>-->
+
+
+<!--		<td> {{ form.port_number }} </td>-->
+
+<!--		<td> {{ form.start_date }} </td>-->
+<!--		</table>-->
+<!--		<br>-->
+<!--		<input type="submit" class="waves-effect waves-light btn-small">-->
+
+<!--		</div>-->
+
+		<p>I or my application tried to do something over the network. I think the firewalls ate my packets.
+		</p>
+		<br>
+		<p>The source of my traffic was:{{ form.source_address }}</p>
+		<br>
+		<p>It was reaching out to {{ form.destination_address }} </p>
+		<br>
+		<p>The port for this communication was (0 for all ports) : {{ form.port_number }}
+		</p>
+
+		<br>
+		<p>and I think the traffic happened on or after {{ form.start_date }}</p>
+
+		<input type="submit" class="waves-effect waves-light btn-small" value="Can you Check?">
+
+    </form>
+	<div class = "container" id = "search_results">
+
+	</div>
+	
+	{% load static %}
+
+	<script type="text/javascript" src="{% static 'js/django_select2.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/jquery.min.js' %}"></script>
+    {{ form.media.js }}
+</div>	
+{% endblock %}
+
+

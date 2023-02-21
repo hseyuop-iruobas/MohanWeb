@@ -1,0 +1,93 @@
+{% extends "base_generic.html" %}
+{% block content %}
+
+<div class = 'container'>
+{% if messages %}
+  {% for message in messages %}
+     {% if message.type == 'success' %}
+      <script>
+         M.toast({html: "{{ message.message }}", classes: 'green rounded', displayLength:2000});
+      </script>
+	 {% endif %}
+	 {% if message.type == 'warning' %}
+      <script>
+         M.toast({html: "{{ message.message }}", classes: 'orange rounded', displayLength:6000});
+      </script>
+	 {% endif %}
+	 {% if message.type == 'error' %}
+      <script>
+         M.toast({ html: "{{ message.message }}", classes: 'red rounded', displayLength:20000});
+      </script>
+	 {% endif %}
+  {% endfor %}
+{% endif %}
+<table>
+<tr>
+<a href="{% url 'NEWSEARCHLOG' %}" class="waves-effect waves-light btn-small">Start a new Log Search (Source/Dest)</a>
+</tr>
+<tr></tr>
+</table>
+<p><strong> My Search List</strong></p>
+  {% if mytaskList %}
+
+		<table id = "table_task_id" class="table responsive-table scroll" >
+			<thead>
+				<tr><th>Task ID</th><th>Task Type</th><th>Search Term</th><th>Owner</th><th>Date</th><th>Status</th></tr>
+			</thead>
+		{% for task in mytaskList %}
+		   {% if task.task_status == 'Not Started' %}
+		         <tr class = "red">
+				   <td><a href="{% url 'MYTASKDETAILS' task.task_id %}">{{ task.task_id }}</a></td>
+		    	   <td><a href="{% url 'MYTASKDETAILS' task.task_id %}">{{ task.task_description }}</a></td>
+		    	   <td>{{ task.task_search_term }}</td>
+		    	   <td>{{ task.db_created_by }}</td>
+				   <td>{{ task.creation_date }}</td>
+				   <td>{{ task.task_status }}</td>
+		        </tr>
+		   {% endif %}
+
+		   {% if task.task_status == 'Started' %}
+		         <tr class = "yellow">
+				   <td><a href="{% url 'MYTASKDETAILS' task.task_id %}">{{ task.task_id }}</a></td>
+		    	   <td><a href="{% url 'MYTASKDETAILS' task.task_id %}">{{ task.task_description }}</a></td>
+		    	   <td>{{ task.task_search_term }}</td>
+		    	   <td>{{ task.db_created_by }}</td>
+				   <td>{{ task.creation_date }}</td>
+				   <td>{{ task.task_status }}</td>
+		        </tr>
+				
+		   {% endif %}				
+		   {% if task.task_status == 'Completed' %}		   
+		         <tr class = "green lighten-4">
+				   <td><a href="{% url 'MYTASKDETAILS' task.task_id %}">{{ task.task_id }}</a></td>
+		    	   <td><a href="{% url 'MYTASKDETAILS' task.task_id %}">{{ task.task_description }}</a></td>
+		    	   <td>{{ task.task_search_term }}</td>
+		    	   <td>{{ task.db_created_by }}</td>
+				   <td>{{ task.creation_date }}</td>
+				   <td>{{ task.task_status }}</td>
+		        </tr>
+		   {% endif %}
+
+		{% endfor %}
+		</table></a>
+
+  {% else %}
+    <p>There are no Tasks for you in Mohan? Mohan lost DB or you haven't searched anything.</p>
+  {% endif %} 
+</div>
+
+
+<script type="text/javascript">
+	$(document).ready(function(){
+		$('#table_task_id').DataTable({
+		keys: true,
+		dom: 'Bfrtip',
+		lengthMenu: [[ 10, 25, 50, -1],['10 rows', '25 rows', '50 rows', 'Show All' ]],
+		buttons: ['pageLength', 'colvis', 'copy', 'csv', 'excel', 'pdf', 'print'],
+		colReorder: true,
+		select: true		,
+		order: [0,'desc']
+		});
+	});
+</script>
+{% endblock %}

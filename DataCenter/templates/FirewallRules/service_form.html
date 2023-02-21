@@ -1,0 +1,93 @@
+{% extends "base_generic.html" %}
+{% block content %}
+
+
+<div class = 'container'>
+{% if messages %}
+  {% for message in messages %}
+     {% if message.type == 'success' %}
+      <script>
+         M.toast({html: "{{ message.message }}", classes: 'green rounded', displayLength:2000});
+      </script>
+	 {% endif %}
+	 {% if message.type == 'warning' %}
+      <script>
+         M.toast({html: "{{ message.message }}", classes: 'orange rounded', displayLength:6000});
+      </script>
+	 {% endif %}
+	 {% if message.type == 'error' %}
+      <script>
+         M.toast({ html: "{{ message.message }}", classes: 'red rounded', displayLength:20000});
+      </script>
+	 {% endif %}
+  {% endfor %}
+{% endif %}
+
+{% if action == 'UPDATE' %}
+    <h1>Updating:</h1>
+{% else %}
+    <h1>Create a new Service</h1>
+{% endif %}
+
+	{{ form.media.css }}
+    <style>
+        .select2-container {
+			width: 100% !important;
+		}
+    </style>
+	
+		<form method="POST" >
+				{% csrf_token %}
+				{% load materializecss %}
+				
+			<div class = table>
+				<table style = 'width:100%'>
+				     <tr><th style = "width:30%">Service Port</th><th style = "width:40%"></th><th style = "width:30%">Service Protocol</th>
+				     <tr>
+				     <td> {{ form.service_dest_port }} </td>
+				     <td></td>
+				     <td> {{ form.service_protocol }} </td>
+				</table>
+				<table><tr><th style = "width:30%">Service Name</th><th style = "width:40%"><th style = "width:30%">Service Description</th></tr>
+					<tr>
+					<td> {{ form.service_name }} </td>
+					<td></td>
+					<td> {{ form.service_description }} </td>
+				</table>	
+
+				<table>
+			    <th style = "width:33%">Service Tag</th><th></th>
+				<tr>
+				<td> {{ form.service_tag }} </td>
+				</tr>
+
+				</table>
+
+        		<br>
+
+				<input type="submit" class="waves-effect waves-light btn-small">
+
+	       </div>
+			
+				
+				
+		  {% load static %}
+			
+
+			<script type="text/javascript" >
+			    $("#id_service_dest_port",).keyup(function(){
+					update();
+					});
+				$("#id_service_protocol",).change(function(){
+					update();
+					});				
+				function update() {
+					$("#id_service_name").val($('#id_service_protocol').val()+'-DST-'+$('#id_service_dest_port').val());
+					$("#id_service_description").val($('#id_service_protocol').val()+'-DST-'+$('#id_service_dest_port').val());
+				};
+				$("#id_service_protocol").trigger("change");
+			</script>
+			{{ form.media.js }}
+		</form>
+</div>
+{% endblock %}

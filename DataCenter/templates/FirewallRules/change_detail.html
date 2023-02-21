@@ -1,0 +1,174 @@
+{% extends "base_generic.html" %}
+
+
+{% block content %}
+<script type="text/javascript" >
+
+  document.addEventListener('DOMContentLoaded', function() {
+    var elems = document.querySelectorAll('.collapsible');
+    var instances = M.Collapsible.init(elems, 'accordion');
+  });
+  document.addEventListener('DOMContentLoaded', function() {
+			var elems = document.querySelectorAll('.sidenav');
+			var instances = M.Sidenav.init(elems, '');
+		});
+
+</script>
+
+
+
+
+
+<div class="container">
+<h4>Change Details</h4>
+
+
+  <ul class="collapsible">
+    <li>
+      <div class="collapsible-header">Change Number   -- Change Status : {{ change.change_status }}</div>
+      <div class="collapsible-body"><span>Change Number is: <strong>{{ change.Change_Number }}</strong></span></div>
+    </li>
+    <li>
+      <div class="collapsible-header">Created on:</div>
+      <div class="collapsible-body"><span>created on {{ change.creation_date }}</span></div>
+    </li>
+    <li>
+      <div class="collapsible-header">Created by:</div>
+      <div class="collapsible-body"><span>Created by: {{ change.db_created_by }}</span></div>
+    </li>
+	<li>
+      <div class="collapsible-header">Requests in this Change are:</div>
+      <div class="collapsible-body"><span>
+		{% for request in change.Requests.all %}
+					<div class="grey lighten-1 pulse">
+					<a href="{% url 'RITMDetails' request.ruleinstance_primarykey %}">{{ request.id }}</a></div>
+
+						<p>Firewall Rules being pushed:</p>
+					<table class="responsive-table" style = "table-layout: fixed;
+																margin-left: auto;
+																margin-right: auto;">
+						<th style="word-wrap:break-word">Source(s)</th>
+						<th style="word-wrap:break-word">Destination(s)</th>
+						<th style="word-wrap:break-word">service(s)</th>
+						<tr style="word-wrap:break-word">
+							<td style="word-wrap:break-word">
+								{% for object in request.source.all %}
+									<a href = "{% url 'OBJECTDETAILS' object.object_id%}">{{ object.object_name }}</a><br>
+								{% endfor %}
+
+							</td>
+							<td style="word-wrap:break-word">
+								{% for object in request.dest.all %}
+									<a href = "{% url 'OBJECTDETAILS' object.object_id%}">{{ object.object_name }}</a><br>
+								{% endfor %}
+
+							</td>
+							<td style="word-wrap:break-word">
+								{% for service in request.service.all %}
+									<a href = "{% url 'SERVICEDETAILS' service.service_id%}">{{ service.service_name }}</a><br>
+								{% endfor %}
+
+							</td>
+						</tr>
+					</table>
+		  	<div class="divider"></div>
+		  	<table>
+				<th>Pushed to Firewall?</th>
+				<th>Action</th>
+				<th>Firewall</th>
+				<th>Source Zone</th>
+				<th>Destination Zone</th>
+		  	{% for firewallrule in request.rule_instance.all %}
+		  			<tr>
+						  <td>{{ firewallrule.pushed_to_firewall }}</td>
+						  <td>{{ firewallrule.action }}</td>
+						  <td>{{ firewallrule.devicegroup.firewall_Name }}</td>
+						  <td>{%for source in firewallrule.source_zone.all %}
+							<p>{{ source }}</p>
+						  {% endfor %}
+						  </td>
+						  <td>{%for dest in firewallrule.destination_zone.all %}
+							<p>{{ dest }}</p>
+						  {% endfor %}
+						  </td>
+					  </tr>
+		  	{% endfor %}
+				</table><br>
+		{% endfor %}
+	  </span></div>
+    </li>
+	<li>
+      <div class="collapsible-header">SNOW Status/Start: </div>
+		{% csrf_token %}
+      <div class="collapsible-body"><span><button class="waves-effect waves-light btn-small" onclick="check_SNOW_stat()">
+		  Check Status
+	  </button></span>
+	  	<span><a class="waves-effect waves-light btn-small" id="Run_Change_Button" href="{% url 'CHANGEUpdate' change.id %}">
+		  Run The Change
+	  	</a></span>
+	  </div>
+    </li>
+
+
+    <li>
+      <div class="collapsible-header" hx-get="{% url 'GETCHANGELOGJSON'  change.id %}"
+		   hx-target="#change_log_container"
+		   hx-swap="outerHTML"
+		   hx-trigger="click, every 9s"
+	  	   hx-indicator="#warning_indicator" >CLICK TO SEE LOGS</div>
+      <div class="collapsible-body"><span>
+	  <div class = 'container'>
+		  <div class ="htmx-indicator" id ="warning_indicator"><span><p class = "grey lighten-1 pulse">
+			...Making a Query to Server for Logs please hold...</p></span></div>
+		  {% include 'FirewallRules/change_detail_log.html' %}
+	  </div>
+	  </span></div>
+    </li>
+
+  </ul>
+</div>
+<script type="text/javascript" >
+			     $( window ).on("load", function() {
+				     $('#Run_Change_Button').hide();
+
+			    });
+			    function check_SNOW_stat(){
+			        console.log("starting to do something here")
+			    	$.ajax({
+			    		url : "checksnowstatus/{{ change.id }}",
+			    		type : "POST",
+			    		header: {'X-CSRFToken': '{{ csrf_token }}'},
+			    		data : {
+			    		    'change_id' : '{{ change.id }}',
+			    		    'csrfmiddlewaretoken': '{{ csrf_token }}',
+			    		 },
+			    		 'dataType': 'json',
+
+			    		success : function(json) {
+				    	    console.log(json.status);
+				    	    if (json.status == 'Ready'){
+				    	        $('#Run_Change_Button').show();
+				    	        M.toast({html: "Looks like you are in Luck Change is approved - \( ﾟヮﾟ)/", classes: 'green rounded', displayLength:2000});
+				    	        console.log("success");
+				    	    } else if (json.status == 'Closed'){
+				    	        M.toast({html: "( ・◇・)？Change is Closed try a new one?", classes: 'red rounded', displayLength:6000});
+				    	        $('#Run_Change_Button').hide();
+				    	    } else{
+				    	        M.toast({html: "q(╯ᆺ╰๑) Change is NOT approved yet", classes: 'red rounded', displayLength:6000});
+				    	        console.log("no change allowed yet")
+				    	        $('#Run_Change_Button').hide();
+				    	    }
+
+				    	},
+			    		error : function(xhr,errmsg,err) {
+			    		    M.toast({html: "SOMETHING WENT HORRIBLY WRONG", classes: 'red rounded', displayLength:6000});
+	            			console.log(xhr.status + ": " + xhr.responseText); // provide a bit more info about the error to the console
+	            		}
+
+			    });};
+
+
+
+</script>
+
+{% endblock %}

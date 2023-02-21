@@ -1,0 +1,49 @@
+{% block content%}
+{% autoescape on %}
+<div id = "change_log_container">
+	<div class="wrapper">
+		{% for line in change_log %}
+			 {% if 'invisible_tag_start' in line %}
+				</div>
+			 {% endif %}
+			 {% if 'invisible_tag_end' in line %}
+				<div class = 'orange pulse'>
+			 {% endif %}
+			 {% if 'pulling API keys' in line %}
+			     <h6 class = 'green'> Next Line has API keys?:</h6>
+			 {% endif %}
+		     {% if 'errored out' in line %}
+			     <h6 class = 'red'> Next Line shows Any Errors:</h6>
+			 {% endif %}
+		     {% if 'Current Status for Plays' in line %}
+			     <h6 class = 'green'> Next line has ansible play status:</h6>
+			 {% endif %}
+			 {% if '^^^^^^^^^^^^^^^^^^^^^$44444444444444444444bad' in line %}
+			     <h6 class = 'red'> Next line has bad Objects in it:</h6>
+			 {% endif %}
+			 {% if '$$$$$$$' in line %}
+			     <h6 class = 'blue'> something informative next:</h6>
+			 {% endif %}
+			 {% if 'failed: [my-panorama]' in line %}
+			     <h5 class = 'red'> ANSIBLE CHANGE FAILED:</h5>
+			 {% endif %}
+			 {% if 'changed: [my-panorama] ' in line %}
+				<div class="divider"></div>
+				<div class = 'row light-blue accent-3' ><p> {{ line|safe }} </p></div>
+			 {% elif 'skipping: [my-p' in line %}
+				<div class="divider"></div>
+				<div class = 'row blue lighten-4' ><p> {{ line|safe }} </p></div>
+			 {% else %}
+					{% if 'invisible_tag_' in line %}
+					   <!-- invisible tag  here !-->
+					{% else %}
+						<div class = 'row' ><p> {{ line }} </p></div>
+					{% endif %}
+			 {% endif %}
+
+		{% endfor %}
+	</div>
+
+</div>
+{% endautoescape %}
+{% endblock %}

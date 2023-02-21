@@ -1,0 +1,55 @@
+{% extends "base_generic.html" %}
+
+
+{% block content %}
+<div class = 'container'>
+<p><strong> Vlan List</strong></p>
+  {% if vlan_list %}
+	<div class ="divider"></div>
+	<div class = "section">
+		<table id = "table_vlan_id" class="table responsive-table scroll" >
+			<thead>
+				 <tr>
+					 <th>Vlan ID</th>
+					 <th>Vlan Name</th>
+					 <th>DataCenter</th>
+				</tr>
+			</thead>
+			<tbody>
+
+					{% for vlan in vlan_list %}
+					<tr>
+						<td>
+							<a style="color:blue" href="{{ vlan.pk }}">{{ vlan.vlan_number }}</a>
+						</td>
+						<td>
+							 {{ vlan.vlan_name }}
+						</td>
+						<td>
+							 {{ vlan.vlan_datacenter }}
+						</td>
+					</tr>
+					{% endfor %}
+			</tbody>
+		</table>
+	</div>
+  {% else %}
+    <p>Tere are no vlans in the datacenter??? something has gone horribly wrong or it has no firewall zone assigned</p>
+  {% endif %} 
+
+
+</div>
+
+<script type="text/javascript">
+	$(document).ready(function(){
+		$('#table_vlan_id').DataTable({
+		keys: true,
+		dom: 'Bfrtip',
+		lengthMenu: [[ 10, 25, 50, -1],['10 rows', '25 rows', '50 rows', 'Show All' ]],
+		buttons: ['pageLength', 'colvis', 'copy', 'csv', 'excel', 'pdf', 'print'],
+		colReorder: true,
+		select: true
+		});
+	});
+</script>
+{% endblock %}

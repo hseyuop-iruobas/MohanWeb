@@ -1,0 +1,48 @@
+
+{% extends "base_generic.html" %}
+
+
+{% block content %}
+
+			<script type="text/javascript" >
+				document.addEventListener('DOMContentLoaded', function() {
+				var elems = document.querySelectorAll('.dropdown-trigger');
+				var instances = M.Dropdown.init(elems, {'alignment':'left', 'hover':'True'});
+			});
+				
+				
+			</script>
+
+
+<br><br>
+	<!-- ***** Main Banner Area Start ***** -->
+    <div class="main-banner header-text" id="top">
+          <!-- Item -->
+
+					{% load static %}
+					<!--img src="{% static 'images/slide-01.jpg'%}" alt=""!-->
+		<div class="container z-depth-2 blue-grey lighten-5 center">
+					<h3>Welcome To Mohan Automagication Home</h3>
+					<h5>Where Everything is a Dream</h5>
+					<p>including uptime</p>
+					<a href="{% url 'VLANLIST' %}" class="waves-effect waves-light btn-small">Learn about VLANS</a>
+					<a href="{% url 'TENANTLIST' %}" class="waves-effect waves-light btn-small">Vlan to Tenant Mapping</a>
+					<a href="{% url 'VLANTABLEVIEW' %}" class="waves-effect waves-light btn-small">Vlan IP Mapping</a>
+					<br><br><br>
+
+						<ul>
+							<li><strong>VLAN Total:</strong> {{ totalVLAN_count }}</li>
+							<li><strong>VRF/Tenant Total:</strong> {{ totalVRF_count }}</li>
+							<li><strong>Total Rule Instances Mohan is aware of:</strong> {{ totalRuleInstance_count }}</li>
+							<li><strong>Total Changes Built By Mohan:</strong> {{ totalChanges_count }}</li>
+							<li><strong>Total Firewall rules Mohan is aware of:</strong> {{ totalfirewallRules_count }}</li>
+							<li><strong>Total search actions:</strong> {{ totalsearchTasks }}</li>
+						</ul>
+
+		</div>
+
+	</div>
+	<p><br><br><br></p>
+{% endblock %}
+
+

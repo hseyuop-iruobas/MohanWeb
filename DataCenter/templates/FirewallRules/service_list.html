@@ -1,0 +1,46 @@
+{% extends "base_generic.html" %}
+
+{% block content %}
+
+<div class = 'container'>
+<table>
+<tr>
+<a href="{% url 'SERVICECreate' %}" class="waves-effect waves-light btn-small">Create a new Service</a>
+</tr>
+<tr></tr>
+</table>
+<p><strong> Known Services List</strong></p>
+  {% if service_list %}
+    <div class="container">
+		<table id = "table_services_id" class="table responsive-table scroll" >
+			<thead>
+				<tr><th>ID</th><th>Name</th><th>Protocol</th><th>Port</th></tr>
+			</thead>
+		{% for service in service_list %}
+		<tr>
+			<td><a href="{% url 'SERVICEDETAILS' service.service_id %}">{{ service.service_id }}</a></td>
+			<td><a href="{% url 'SERVICEDETAILS' service.service_id %}">{{ service.service_name }}</a></td>
+			<td>{{ service.service_protocol }}</a></td>
+			<td>{{ service.service_dest_port }}</a></td>
+		</tr>
+		{% endfor %}
+		</table>
+	</div>
+  {% else %}
+    <p>There are no Services in the Mohan??? Mohan lost DB or only pawn in game of life?.</p>
+  {% endif %} 
+</div>
+
+<script type="text/javascript">
+	$(document).ready(function(){
+		$('#table_services_id').DataTable({
+		keys: true,
+		dom: 'Bfrtip',
+		lengthMenu: [[ 10, 25, 50, -1],['10 rows', '25 rows', '50 rows', 'Show All' ]],
+		buttons: ['pageLength', 'colvis', 'copy', 'csv', 'excel', 'pdf', 'print'],
+		colReorder: true,
+		select: true
+		});
+	});
+</script>
+{% endblock %}

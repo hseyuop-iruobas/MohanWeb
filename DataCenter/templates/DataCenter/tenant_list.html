@@ -1,0 +1,56 @@
+
+{% extends "base_generic.html" %}
+
+
+{% block content %}
+<div class = 'container'>
+<p><strong> Tenant List</strong></p>
+  {% if tenant_list %}
+	<div class ="divider"></div>
+	<div class = "section">
+		<table id = "table_tenant_id" class="table responsive-table scroll" >
+			<thead>
+				 <tr>
+
+					 <th>VRF Name</th>
+					 <th>VRF RD Value</th>
+					 <th>VRF BGP Bundle Name</th>
+				</tr>
+			</thead>
+			<tbody>
+
+					{% for tenant in tenant_list %}
+					<tr>
+						<td>
+							 <a style="color:blue" href="{{ tenant.pk }}">{{ tenant.vrf_name }}</a>
+						</td>
+						<td>
+							 {{ tenant.vrf_rd_value }}
+						</td>
+						<td>
+							 {{ tenant.vrf_bgp_bundle_name }}
+						</td>
+					</tr>
+					{% endfor %}
+			</tbody>
+		</table>
+	</div>
+  {% else %}
+    <p>Tere are no Tenants in the datacenter??? something has gone horribly wrong</p>
+  {% endif %}
+
+</div>
+
+<script type="text/javascript">
+	$(document).ready(function(){
+		$('#table_tenant_id').DataTable({
+		keys: true,
+		dom: 'Bfrtip',
+		lengthMenu: [[ 10, 25, 50, -1],['10 rows', '25 rows', '50 rows', 'Show All' ]],
+		buttons: ['pageLength', 'colvis', 'copy', 'csv', 'excel', 'pdf', 'print'],
+		colReorder: true,
+		select: true
+		});
+	});
+</script>
+{% endblock %}

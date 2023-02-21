@@ -1,0 +1,28 @@
+{% extends "base_generic.html" %}
+{% block content %}
+{% load widget_tweaks %}
+{% load static %}
+
+<div class="container">
+
+
+    {% if action == 'UPDATE' %}
+    <h1>Updating:</h1>
+
+    {% else %}
+    <h1>Create a New Object</h1>
+
+    {% endif %}
+    <div> <button class="waves-effect waves-light btn-small" onclick="checkPano()">
+                    Populate Address From Pano
+    </button>
+
+
+    </div>
+    <div id = "object_form_div">
+        {% include 'FirewallRules/object_form_holder.html' %}
+
+    </div>
+</div>
+
+{% endblock %}

@@ -1,0 +1,29 @@
+{% extends "base_generic.html" %}
+{% block content %}
+{% load widget_tweaks %}
+{% load static %}
+
+<div class="container">
+
+
+    {% if action == 'UPDATE' %}
+    <h1>Updating:</h1>
+        <div class="center"><p>Address Group :{{ address_group_name }}</p></div>
+    {% else %}
+    <h1>Create a New Address Group</h1>
+
+    {% endif %}
+
+
+    <!--	<button href class="waves-effect waves-light btn-small" onclick ="checkPanoGroup()">-->
+    <button class="waves-effect waves-light btn-small" hx-get="{% url 'GETPANOVALUEOBJECTGROUPNAMEVIEW'  %}" hx-target="#object_form_div" hx-swap="innerHTML" hx-trigger="click" hx-include = "[name='object_name']">
+                    Populate Address-Group From Pano
+
+    </button>
+
+    <div id = "object_form_div">
+        {% include 'FirewallRules/address_group_form_holder.html' %}
+    </div>
+</div>
+
+{% endblock %}

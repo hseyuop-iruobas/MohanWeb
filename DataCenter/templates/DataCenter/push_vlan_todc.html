@@ -1,0 +1,20 @@
+
+{% extends "base_generic.html" %}
+
+{% block content %}
+<!--
+<p><select name="vlan">
+{% for vlan in vlan_database %}
+    <option value="{{ vlan.vlan_id }}">{{ vlan.vlan_name }}</option>
+{% endfor %}
+</select></p>
+!-->
+  
+  <form action="" method="post">
+    {% csrf_token %}
+    <table>
+    {{ form.as_table }}
+    </table>
+    <input type="submit" value="Submit">
+  </form>
+{% endblock %}

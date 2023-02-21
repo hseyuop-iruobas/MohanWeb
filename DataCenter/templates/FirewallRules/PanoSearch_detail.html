@@ -1,0 +1,195 @@
+{% extends "base_generic.html" %}
+
+
+{% block content %}
+<script type="text/javascript" >
+  document.addEventListener('DOMContentLoaded', function() {
+    var elems = document.querySelectorAll('.collapsible');
+    var instances = M.Collapsible.init(elems, 'accordion');
+  });
+  document.addEventListener('DOMContentLoaded', function() {
+			var elems = document.querySelectorAll('.sidenav');
+			var instances = M.Sidenav.init(elems, options);
+		});
+    document.addEventListener('DOMContentLoaded', function() {
+    var elems = document.querySelectorAll('.tooltipped');
+    var instances = M.Tooltip.init(elems, options);
+  });
+  document.addEventListener('DOMContentLoaded', function() {
+    var elems = document.querySelectorAll('.tooltipped');
+    var instances = M.Tooltip.init(elems, exitDelay=10);
+  });
+</script>
+<br>
+<div class = "row">
+
+	<div class="col s2">
+	</div>
+	<div class="container left col s10">
+	<h4>Search Result Details</h4>
+	<a class="waves-effect waves-light btn-small right-align" href='{% url "RERUNSEARCHLOG" mytask.task_id %}'>Re-Run Query</a>
+	
+	
+	<ul class="collapsible">
+		<li>
+		<div class="collapsible-header">Task Number  </div>
+		<div class="collapsible-body"><span>Task Number is: <strong>{{ mytask.job_id }}</strong></span></div>
+		</li>
+		<li>
+		<div class="collapsible-header">Created on:</div>
+		<div class="collapsible-body"><span>created on {{ mytask.creation_date }}</span></div>
+		</li>
+		<li>
+		<div class="collapsible-header">Created by:</div>
+		<div class="collapsible-body"><span>Created by: {{ mytask.db_created_by }}</span></div>
+		</li>
+		<li>
+		<div class="collapsible-header">Search Term was:</div>
+		<div class="collapsible-body"><span> {{ mytask.task_search_term }}</span></div>
+		</li>  </ul>
+		{% if result_list %}
+	
+			<table id = "table_rules_id" class="table responsive-table scroll" >
+			<thead>
+			<tr style="width: auto;">
+			<th style ="font-size:0.875em">time_generated</th>
+			<th style ="font-size:0.875em">Protocol</th>
+			<th style ="font-size:0.875em">Destination Port</th>
+			<th style ="font-size:0.875em">Rule</th>
+			<th style ="font-size:0.875em">From (Zone/Source)</th>
+			<th style ="font-size:0.875em">To (Zone/destination)</th>
+			<th style ="font-size:0.875em">Action</th>
+			<th style ="font-size:0.875em">Session End Reason</th>
+			<th style ="font-size:0.875em">action_source</th>
+			<th style ="font-size:0.875em">Application</th>
+			<th style ="font-size:0.875em">Reporting Firewall</th>
+			</tr></thead>
+			<tbody>
+			{% for line in result_list %}
+			<tr>
+			<td style ="font-size:0.875em">{{ line.time_generated }}</td>
+			<td style ="font-size:0.875em">{{ line.proto }}</td>
+			<td style ="font-size:0.875em">{{ line.dport }}</td>
+			<td style ="font-size:0.875em">{{ line.rule }}</td>
+			<td style ="font-size:0.875em">{{ line.from }}/{{ line.src }}</td>
+			<td style ="font-size:0.875em">{{ line.to }}/{{ line.dst }}</td>
+	
+			{% if line.action == 'allow' %}
+			<td class = "green tooltipped" data-position= "left" data-tooltip="the firewalls allowed the traffic. IF your flow aint flowing, ask yourself what could be blocking this? if the firewalls are allowing it ..."   style ="font-size:0.875em">{{ line.action }}</td>
+			{% endif %}
+			{% if line.action != 'allow' %}
+			<td class = 'red' style ="font-size:0.875em">{{ line.action }}</td>
+			{% endif %}
+			
+			{% if '-rst-from-client' in line.session_end_reason %}
+			<td class = "red lighten-4" style ="font-size:0.875em"><a class=" bold waves-effect waves-light modal-trigger" href="#red-lighten-4">{{ line.session_end_reason }}</a></td>
+			{% elif '-rst-from-server' in line.session_end_reason %}
+			<td class = "red darken-4" data-position="left"  style ="font-size:0.875em"><a class=" bold waves-effect waves-light modal-trigger" href="#red-darken-4">{{ line.session_end_reason }}</a></td>
+			{% elif 'policy-deny' in line.session_end_reason %}
+			<td class = 'red red' style ="font-size:0.875em" ><a class="bold  waves-effect waves-light modal-trigger" href="#red-red">{{ line.session_end_reason }}</a></td>
+			{% elif 'fin' in line.session_end_reason %}
+			<td class = 'green' style ="font-size:0.875em"><a class="bold  waves-effect waves-light modal-trigger" href="#green">{{ line.session_end_reason }}</a></td>
+			{% elif 'aged-out' in line.session_end_reason %}
+			<td class = "orange" style ="font-size:0.875em"><a class="bold  waves-effect waves-light modal-trigger" href="#orange">{{ line.session_end_reason }}</a></td>
+			{% else %}
+			<td class = 'green' style ="font-size:0.875em">{{ line.session_end_reason }}</td>
+			{% endif %}
+			<td style ="font-size:0.875em">{{ line.action_source }}</td>
+			<td style ="font-size:0.875em">{{ line.app }}</td>
+			<td style ="font-size:0.875em">{{ line.device_name }}</td>
+	
+			</tr>			 
+			{% endfor %}
+			</tbody>		
+			</table>		
+	    {% else %}
+		    <h5> Sorry Mohan couldn't find anything in the logs matching <i>{{ mytask.task_search_term }}</i>. Maybe generate some events and try searching again?</h5>
+		{% endif %}
+
+
+  <!-- Modal Structure -->
+  <div id="orange" class="modal modal-fixed-footer">
+    <div class="modal-content">
+      <h4>Aged Out</h4>
+      <p>If an Allow action and you see aged-out then it is probably something upstream stopping the traffic from getting to the server or the return traffic is not making it back.</p>
+	  <p>Do you have a windows firewall? how about security groups configured correctly? if you are sure about all that  - run a capture on both client and server.
+		  slight possibility you have asymmetric routing so try to access something else in that subnet does it work? KEEP IN MIND ONLY TCP REALLY AGES OUT. UDP AND ICMP AGE OUTS COULD BE FINE</p>
+	<ul class="collection">
+		<li class="collection-item">Check Security Groups?</p></li>
+	  <li class="collection-item">Check end point's firewall configuration (?) on the OS level</p></li>
+	  <li class="collection-item">Wireshark capture on both ends?</p></li>
+	  <li class="collection-item">Maybe there is asymmetric Routing? do random firewalls show up in the logs?</p></li>
+	  <li class="collection-item">remember UDP and ICMP dont really age out this might be false alarm</p></li></ul>
+	  <p><b>Recommendation:</b></p>
+		<ul>
+	  <p><li>wireshark!</p></li>
+	</ul>
+    </div>
+  </div>
+
+
+
+  <!-- Modal Structure -->
+  <div id="green" class="modal modal-fixed-footer">
+    <div class="modal-content">
+      <h4>Fin</h4>
+      <p>What is there to say? They finished talking<p>
+	  <p><b>Recommendation: </b>Nothing? ask them to talk more?</p>
+    </div>
+  </div>
+
+
+
+  <!-- Modal Structure -->
+  <div id="red-lighten-4" class="modal modal-fixed-footer">
+    <div class="modal-content">
+      <h4>Reset From Client</h4>
+      <p>Either the client is done talking or something on client side went wrong.<p>
+	  <p><b>Recommendation: </b>Wireshark Capture recommended</p>
+    </div>
+  </div>
+
+
+  <!-- Modal Structure -->
+  <div id="red-darken-4" class="modal modal-fixed-footer">
+    <div class="modal-content">
+      <h4>Reset From Server</h4>
+      <p>In Short the Server or something Upstream did not want to talk to you. This is an active reset being sent back.</p>
+	  <p>If you see a drop action from a firewall in the logs above or below then maybe it is a Network firewall. Otherwise is the server listening on this port? does it have a firewall that needs to be configured? if in AWS did you ask Platform to open up ze ports?<p>
+	  <p><b>Recommendation: </b></p>
+	  <p>Check the logs for drops</p>
+	  <p>Check the Server for firewalls or settings that might stop it from talking to you?</p>
+    </div>
+  </div>
+
+  <!-- Modal Structure -->
+  <div id="red-red" class="modal modal-fixed-footer">
+    <div class="modal-content">
+      <h4>Policy Deny</h4>
+      <p>You hit the Jackpot. Mohan can help with this if you want (and have a T1) OR put a RITM in to get a firewall rule built.</p>
+	  <p><b>Recommendation: </b></p>
+	  <p>Request approval from Infosec</p>
+	  <p>Learn how to use Mohan to build firewallrules?</p>
+    </div>
+  </div>
+	</div>
+</div>
+
+<script type="text/javascript">
+	$(document).ready(function(){
+		$('#table_rules_id').DataTable({
+		keys: true,
+		dom: 'Bfrtip',
+		lengthMenu: [[ 10, 25, 50, -1],['10 rows', '25 rows', '50 rows', 'Show All' ]],
+		buttons: ['pageLength', 'colvis', 'copy', 'csv', 'excel', 'pdf', 'print'],
+		colReorder: true,
+		select: true,
+		order: [0,'desc']
+		});
+	});
+	document.addEventListener('DOMContentLoaded', function() {
+    var elems = document.querySelectorAll('.modal');
+    var instances = M.Modal.init(elems, {'opacity':.5});
+  });
+</script>
+{% endblock %}
