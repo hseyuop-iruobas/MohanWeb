@@ -1,123 +1,46 @@
 {% extends "base_generic.html" %}
+
 {% block content %}
-{% load widget_tweaks %}
-{% load static %}
-    <div class = 'container'>
-        {% if messages %}
-          {% for message in messages %}
-             {% if message.type == 'success' %}
-              <script>
-                 M.toast({html: "{{ message.message }}", classes: 'green rounded', displayLength:2000});
-              </script>
-             {% endif %}
-             {% if message.type == 'warning' %}
-              <script>
-                 M.toast({html: "{{ message.message }}", classes: 'orange rounded', displayLength:6000});
-              </script>
-             {% endif %}
-             {% if message.type == 'error' %}
-              <script>
-                 M.toast({ html: "{{ message.message }}", classes: 'red rounded', displayLength:20000});
-              </script>
-             {% endif %}
-          {% endfor %}
-        {% endif %}
-        <div style="center"><h1>Create a Change</h1></div>
-        <div name="change_option_container">
-            <label>
-                <input class ="with-gap" name="group1" type="radio" id="FW_Rule_Radio_Button" onclick="checkRadio(id)" checked />
-                <span>Add Firewall Rule(s)</span>
+<div class = 'container'>
+
+	<div name="change_option_container">
+
+			<label>
+                <input class ="with-gap" name="group1" type="radio" id="change_firewall_rule"
+					   hx-get="{% url 'CHANGECreateFirewall' %}"
+					   hx-target="#change_container" hx-swap="outerHTML" hx-trigger="click"
+					   hx-indicator="#warning_indicator" />
+                <span>Firewall Rule Change</span>
             </label>
             <label>
-                <input class ="with-gap" name="group1" type="radio" id="FVLAN_Radio_Button" onclick="checkRadio(id)" />
-                <span>Add Vlans</span>
+                <input class ="with-gap" name="group1" type="radio" id="vlan_change_button"
+					   hx-get="{% url 'CHANGECreateFirewall' %}"
+					   hx-target="#change_container" hx-swap="outerHTML" hx-trigger="click"
+					   hx-indicator="#warning_indicator">
+                <span>Vlan Add Change</span>
             </label>
-        </div>
-        <div id="change_form_holder">
-            <div id="FirewallRule_Container">
-
-            {{ form.media.css }}
-            <style>
-                .select2-container {
-                    width: 100% !important;
-                }
-            </style>
-            <form method="POST" id="firewall_rule_form" action="">
-                {% csrf_token %}
-                {% load materializecss %}
-                <div class = table>
-                <table style = 'width:100%'>
-                <tr><th style = "width:50%">RITM/Rule Instance</th>
-                <tr>
-                <td> {{ form.Requests |attr:"id:firewall_rules" }} </td>
-                </table>
-
-
-
-                <br>
-                <input type="submit" value="Submit" class="waves-effect waves-light btn-small">
-                </div>
-            </form>
-            {{ form.media.js }}
-            </div>
-        </div>
-
+            <label>
+                <input class ="with-gap" name="group1" type="radio" id="Location_change_button"
+					   hx-get="{% url 'CHANGECreateLocationVPN' %}"
+					   hx-target="#change_container" hx-swap="outerHTML" hx-trigger="click"
+					   hx-indicator="#warning_indicator">
+                <span>Add/Update Locations</span>
+            </label>
 
     </div>
-    <script type="text/javascript" >
-        function checkRadio(name) {
-            if(name == "FW_Rule_Radio_Button"){
-                console.log("Choice: ", name);
-                $('#FirewallRule_Container').show();
-            } else if (name == "FVLAN_Radio_Button"){
-                M.toast({html: "I dont know how to do that yet! - \( ﾟヮﾟ)/", classes: 'green rounded', displayLength:2000});
-                $('#FirewallRule_Container').hide();
-            }
-        };
-        function redirectMe(id){
-					window.location.href = "{% url 'CHANGELIST' %}"+id
-				};
+	<div class ="htmx-indicator" id ="warning_indicator"><span><p class = "grey lighten-1 pulse">
+			Some change forms load slowly - the moose outfront told you right?</p></span></div>
+	<div name="change_container" id="change_container">
 
-        $('#firewall_rule_form').on('submit', function(event){
-				event.preventDefault();
-				console.log("form submitted!")  // sanity check
-				M.toast({html: "I've posted your request - may take a few to get the result!", classes: 'green rounded', displayLength:2000});
-				$.ajax({
-					url : "{% url 'CHANGECreate' %}",
-					type: "POST",
-					header: {'X-CSRFToken': '{{ csrf_token }}'},
-					data: {
-						'requests_in_change': $('#firewall_rules').select2('val'),
-						'csrfmiddlewaretoken': '{{ csrf_token }}',
-						'request_type' : 'FIREWALL_RULE',
+	</div>
+</div>
 
-					},
-					'dataType': 'json',
-					success : function(json) {
-				    	    console.log(json.result);
-				    	    if (json.result == 'success'){
-				    	        $('#view_record_button').show();
-				    	        M.toast({html: "I made the change - " + json.change_number + " - \( ﾟヮﾟ)/", classes: 'green rounded', displayLength:2000});
-				    	        console.log("success");
-				    	        console.log(json.change_number);
-				    	        setTimeout(redirectMe(json.change_id), 5000);
 
-				    	    } else {
-				    	        M.toast({html: "( ・◇・)？something went wrong with this request. Check the console logs (f12)", classes: 'red rounded', displayLength:6000});
-				    	        M.toast({html: "( ・◇・)？Actually "+ json.data, classes: 'red rounded', displayLength:6000});
-				    	        console.log(json.data);
-				    	        $('#view_record_button').hide();
-				    	    }
 
-				    },
-					error : function(xhr,errmsg,err) {
-						M.toast({html: "SOMETHING WENT HORRIBLY WRONG", classes: 'red rounded', displayLength:6000});
-						console.log(xhr.status + ": " + xhr.responseText); // provide a bit more info about the error to the console
-					}
-					});});
+<script type = "text/javascript">
+    htmx.onLoad(function(target) {
+        $('.django-select2').djangoSelect2();
+        });
 
-    </script>
-
+</script>
 {% endblock %}
-
-

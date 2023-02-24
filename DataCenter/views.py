@@ -4,7 +4,7 @@ from DataCenter.SnowChange import SNOWChange
 from DataCenter.models import (Vlan, Tenant, DataCenter,SNOWChangeTemplate)
 from FirewallRules.models import (Change, RuleInstance, FirewallRules, task,tag,
                                   secZone, Object, Service, Firewall_Interface, Duplicates,
-                                  Location, IKE_VPN, AddressGroup)
+                                  Location, IKE_VPN, AddressGroup,VirtualRouter,Firewall)
 from FirewallRules.buildikevpn import buildikeVPN
 from FirewallRules.vars import (getSNOW_Username, getSNOW_Password,relativePath,
                                 panorama_server, pano_readonly_username, pano_readonly_password,
@@ -16,9 +16,7 @@ from FirewallRules.populateDBFirewallsFromPano import (getSingleobjectswithtag,p
                                                        getallobjectswithtag,)
 from FirewallRules.buildFirewallRulesWeb import buildFirewallwebRules
 from FirewallRules.checkSrcDstLogs import (get_job_id_SrcDstLogsv2,
-                                           get_job_data_fromPanorama,
-                                           get_job_id_RoutingChange,
-                                           get_job_data_from_device)
+                                           get_job_data_fromPanorama,)
 from FirewallRules.EDLtoObject import EDLtoObjectGroupFunction
 from DataCenter.forms import (RuleInstanceForm, ChangeInstancePushForm, ChangeInstanceFormv2,
                               CreateObjectForm, ServiceInstanceForm,
@@ -146,6 +144,49 @@ def index(request):
     }
 
     return render(request, 'index.html', context=context)
+
+@login_required
+def getDataCenters(request):
+    datacenter_query = DataCenter.objects.all()
+    return render(request, 'FirewallRules/minimized/datacenter_drop_down_options.html',
+                  {'datacenter_query' : datacenter_query})
+
+@login_required
+def getLocations(request):
+    locations_query = Location.objects.filter(location_classification_type = 'normal')
+    return render(request, 'FirewallRules/minimized/locations_drop_down_options.html', {'locations_query' : locations_query})
+
+@login_required
+def LocationVPNcreateCHANGE(request):
+    return render(request, 'FirewallRules/addVPN_form.html',
+                  {})
+
+@login_required
+def getFirewallsDataCenter(request):
+    target_datacenter = DataCenter.objects.get(id=request.GET.get('datacenter_id'))
+    firewall_query = Firewall.objects.filter(firewall_datacenter=target_datacenter)
+    return render(request, 'FirewallRules/minimized/firewall_drop_down_options.html',
+                  {'firewall_query': firewall_query,})
+
+@login_required
+def getoutsideinterfaces(request):
+    target_firewalls = Firewall.objects.get(firewall_ID=request.GET.get('firewall_id'))
+    outside_interface_query = Firewall_Interface.objects.filter\
+        (is_vpn=True, Firewall_Interface_virtual_router__in=[v.id for v in VirtualRouter.objects.filter
+            (virtual_router_firewall=target_firewalls)]).distinct()
+    return render(request, 'FirewallRules/minimized/interface_drop_down_options.html',
+                  {'outside_interface_query': outside_interface_query,})
+
+@login_required
+def gettunnelinterfaces(request):
+    target_firewalls = Firewall.objects.get(firewall_ID=request.GET.get('firewall_id'))
+    outside_interface_query = Firewall_Interface.objects.filter\
+        (Firewall_Interface_name__icontains='tunnel.', Firewall_Interface_virtual_router__in=[v.id for v in VirtualRouter.objects.filter
+            (virtual_router_firewall=target_firewalls)]).distinct()
+    return render(request, 'FirewallRules/minimized/interface_drop_down_options.html',
+                  {'outside_interface_query': outside_interface_query,})
+
+
 
 @login_required
 def searchboxresult(request):
@@ -506,11 +547,14 @@ def updateRITM(request,pk):
                             content_type="application/json")
 
 
-
+@login_required
+def createCHANGEGeneralForm(request):
+    messages = []
+    return render(request, 'FirewallRules/change_form.html', {'form': None, 'messages': messages, })
 
 
 @login_required
-def createCHANGE(request):
+def FirewallcreateCHANGE(request):
     messages = []
     form = ChangeInstanceFormv2()
     if request.method == 'GET':
@@ -667,7 +711,7 @@ def createCHANGE(request):
             response_data['change_id'] = ourChange.id
             return HttpResponse(json.dumps(response_data),
                                 content_type="application/json")
-    return render(request, 'FirewallRules/change_form.html', {'form': form, 'messages': messages, })
+    return render(request, 'FirewallRules/firewall_change_form.html', {'form': form, 'messages': messages, })
 
 
 @login_required
@@ -749,7 +793,7 @@ def UpdateChange(request, pk):
                 messages.append({'type': 'error', 'message': f' {form.errors[key][0]}'})
             if not THISISPROD : print(messages)
 
-    return render(request, 'FirewallRules/change_form_push.html',
+    return render(request, 'FirewallRules/firewall_change_form_push.html',
                   {'form': form, 'messages': messages, 'Change_Number': Change_Number})
 
 

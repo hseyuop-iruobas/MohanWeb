@@ -1,0 +1,4 @@
+<option value = "-1">Select an Option</option>
+{% for datacenter in datacenter_query %}
+<option value = "{{ datacenter.id }}">{{ datacenter.datacenter_Name }}</option>
+{% endfor %}

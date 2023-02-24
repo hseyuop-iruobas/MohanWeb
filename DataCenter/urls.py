@@ -11,6 +11,11 @@ urlpatterns = [
     path('search/and/replace', views.searchAndReplaceView, name='SEARCHANDREPLACEVIEW'),
     path('search/and/replace/object', views.searchObjectResAPI, name='SEARCHOBJECTGETRULES'),
     path("select2/", include("django_select2.urls")),
+    path("ajax/getLocations", views.getLocations, name = 'AJAXGetLOCATIONSFULLLIST'),
+    path("ajax/getDataCenters", views.getDataCenters, name = 'AJAXGetDATACENTERSFULLLIST'),
+    path("ajax/getFirewalls", views.getFirewallsDataCenter, name = 'AJAXGetFirewalls_DC_Specific'),
+    path("ajax/getoutsideinterfaces", views.getoutsideinterfaces, name = 'AJAXGetOUTSIDEINTERFACE_FW_SPECIFIC'),
+    path("ajax/gettunnelinterfaces", views.gettunnelinterfaces, name='AJAXGetTunnelInterfaces_FW_SPECIFIC'),
 ]
 #DataCenter URLS
 urlpatterns += [path('vlans/', views.VlanListView.as_view(), name='VLANLIST'),
@@ -40,7 +45,9 @@ path('RITM/replicate/', views.replicateRuleInstance, name = 'REPLICATERULES'),
 ###Change
 urlpatterns +=[
 path('change/', views.ChangeListView, name = 'CHANGELIST'),
-path('change/create', views.createCHANGE, name = 'CHANGECreate'),
+path('change/create/', views.createCHANGEGeneralForm, name = 'CHANGECreate'),
+path('change/create/firewall', views.FirewallcreateCHANGE, name = 'CHANGECreateFirewall'),
+path('change/create/location_vpn', views.LocationVPNcreateCHANGE, name = 'CHANGECreateLocationVPN'),
 path('change/<int:pk>', views.ChangeDetailView.as_view(), name = 'CHANGEDETAILS'),
 path('change/update/<int:pk>', views.UpdateChange, name='CHANGEUpdate'),
 path('change/checksnowstatus/<int:pk>', views.checksnowstatus, name = 'CHECKSNOWSTATUS'),

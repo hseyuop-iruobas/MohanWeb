@@ -1,0 +1,5 @@
+<option value = "-1">Select an Option</option>
+<option value = "-1">Build a New Location</option>
+{% for location in locations_query %}
+<option value = "{{ location.id }}">{{ location.location_name }}</option>
+{% endfor %}

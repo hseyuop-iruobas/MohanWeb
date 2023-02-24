@@ -1,0 +1,4 @@
+<option value = "-1">Select an Option</option>
+{% for f in firewall_query %}
+<option value = "{{ f.firewall_ID }}">{{ f.firewall_Name }}</option>
+{% endfor %}

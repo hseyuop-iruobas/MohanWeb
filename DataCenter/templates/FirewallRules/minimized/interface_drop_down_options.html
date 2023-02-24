@@ -1,0 +1,4 @@
+<option value = "-1">Select an Interface</option>
+{% for interface in outside_interface_query %}
+<option value = "{{ interface.Firewall_Interface_id }}">{{ interface.Firewall_Interface_name }} -- {{ interface.Firewall_Interface_value }}</option>
+{% endfor %}
