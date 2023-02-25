@@ -1,5 +1,5 @@
 amqp==5.0.9
-ansible==4.10.0
+ansible==7.0.0
 ansible-base==2.10.17
 ansible-core==2.11.12
 ansible-runner==1.4.6
