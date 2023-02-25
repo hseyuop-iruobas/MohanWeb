@@ -61,7 +61,7 @@ pandevice==0.14.0
 paramiko==2.7.2
 pexpect==4.8.0
 phonenumbers==8.12.11
-Pillow==8.3.2
+Pillow==9.3.0
 prettytable==1.0.1
 prompt-toolkit==3.0.19
 psutil==5.8.0
