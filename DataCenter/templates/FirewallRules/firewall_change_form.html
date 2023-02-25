@@ -1,27 +1,28 @@
 {% block content %}
 {% load widget_tweaks %}
 {% load static %}
-    <div class = 'container'>
-        {% if messages %}
-          {% for message in messages %}
-             {% if message.type == 'success' %}
-              <script>
-                 M.toast({html: "{{ message.message }}", classes: 'green rounded', displayLength:2000});
-              </script>
-             {% endif %}
-             {% if message.type == 'warning' %}
-              <script>
-                 M.toast({html: "{{ message.message }}", classes: 'orange rounded', displayLength:6000});
-              </script>
-             {% endif %}
-             {% if message.type == 'error' %}
-              <script>
-                 M.toast({ html: "{{ message.message }}", classes: 'red rounded', displayLength:20000});
-              </script>
-             {% endif %}
-          {% endfor %}
-        {% endif %}
-        <div id="change_container">
+<div class = 'container'>
+    {% if messages %}
+      {% for message in messages %}
+         {% if message.type == 'success' %}
+          <script>
+             M.toast({html: "{{ message.message }}", classes: 'green rounded', displayLength:2000});
+          </script>
+         {% endif %}
+         {% if message.type == 'warning' %}
+          <script>
+             M.toast({html: "{{ message.message }}", classes: 'orange rounded', displayLength:6000});
+          </script>
+         {% endif %}
+         {% if message.type == 'error' %}
+          <script>
+             M.toast({ html: "{{ message.message }}", classes: 'red rounded', displayLength:20000});
+          </script>
+         {% endif %}
+      {% endfor %}
+    {% endif %}
+</div>
+<div id="change_container">
             <div id="FirewallRule_Container">
 
             {{ form.media.css }}
@@ -48,10 +49,7 @@
             </form>
             {{ form.media.js }}
             </div>
-        </div>
-
-
-    </div>
+</div>
 <script type="text/javascript" src="{% static 'js/select2.min.js' %}"></script>
     <script type="text/javascript" src="{% static 'js/django_select2.js' %}"></script>
 

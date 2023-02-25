@@ -98,24 +98,7 @@
 							var elems = document.querySelectorAll('.sidenav');
 							var instances = M.Sidenav.init(elems, options);
 						});
-				$("#object_name",).keyup(function(){
-					update();
-					});
 
-				function update() {
-					$("#object_description").val($('#object_name').val());
-				};
-
-				$("#id_object_type",).change(function(){
-				  if ($(this).val() == 'address-group'){
-				     $('#object_group_members').show();
-					 $('#object_value_table').hide();
-                  } else {
-				     $('#object_group_members').hide();
-					 $('#object_value_table').show();
-			      }
-				 });
-				$("#id_object_type").trigger("change");
 			</script>
 			{{ form.media.js }}
 			</form>
