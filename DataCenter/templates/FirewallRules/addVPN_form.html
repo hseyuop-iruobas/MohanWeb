@@ -1,0 +1,239 @@
+{% block content %}
+{% load widget_tweaks %}
+{% load static %}
+<div class = 'container'>
+    {% if messages %}
+      {% for message in messages %}
+         {% if message.type == 'success' %}
+          <script>
+             M.toast({html: "{{ message.message }}", classes: 'green rounded', displayLength:2000});
+          </script>
+         {% endif %}
+         {% if message.type == 'warning' %}
+          <script>
+             M.toast({html: "{{ message.message }}", classes: 'orange rounded', displayLength:6000});
+          </script>
+         {% endif %}
+         {% if message.type == 'error' %}
+          <script>
+             M.toast({ html: "{{ message.message }}", classes: 'red rounded', displayLength:20000});
+          </script>
+         {% endif %}
+      {% endfor %}
+    {% endif %}
+</div>
+<div name="change_container" id="change_container">
+ <div class = row id="location_div" >
+    <div class='input-field col s12'>
+            <select  id="id_location" name="id_location">
+            </select>
+        <label for="id_location">Location:</label>
+    </div>
+ </div>
+
+    <div class = row id="data_center_field" >
+        <div class='input-field col s12'>
+                <select  id="id_datacenter" name="id_datacenter">
+                </select>
+            <label for="id_datacenter">DataCenter VPN Terminates In:</label>
+        </div>
+     </div>
+    <div class = row id="firewall_field" >
+        <div class='input-field col s12'>
+                <select  id="id_firewall" name="id_firewall">
+                </select>
+            <label for="id_firewall">Firewalls Available:</label>
+        </div>
+     </div>
+    <div class = row id="outside_interface_field" >
+        <div class='input-field col s12'>
+                <select  id="id_outside_interface" name="id_outside_interface">
+                </select>
+            <label for="id_firewall">Outside Interfaces Available:</label>
+        </div>
+     </div>
+    <div class = row id="inside_tunnel_field" >
+        <div class='input-field col s12'>
+                <select  id="inside_tunnel_id" name="inside_tunnel_id">
+                </select>
+            <label for="inside_tunnel_id">Tunnel Interfaces Available:</label>
+        </div>
+    </div>
+    <div class = row id="ike_form_field" >
+        <div class = 'table'>
+				<table><tr><th style = "width:30%">Gateway Name</th><th style = "width:40%">Crypto Profile</th><th style = "width:30%">IPSEC Profile</th></tr>
+					<tr>
+					<td><input type="text" id="ike_gateway_name" name="ike_gateway_name"></td>
+					<td><input type="text" id="ike_crypto_profile" name="ike_crypto_profile"></td>
+					<td><input type="text" id="ike_ipsec_profile" name="ike_ipsec_profile"></td>
+                    </tr>
+				</table>
+				<table>
+			    <th style = "width:33%">Peer IP Address</th>
+				<tr>
+                    <td><input type="text" id="ike_peer_ip_address" name="ike_ipsec_profile"></td>
+
+				</tr>
+				</table>
+                <br>
+                <span><p>Note the Preshared Key will be asked of you during the 'Change Implementation Stage'.
+                        Mohan doesn't like saving important things we'd have to learn about hashing and salting and
+                        encryption and deal with more security worries.
+                        Save your passwords somewhere safe like a password manager...
+                </p></span>
+        </div>
+    </div>
+    <div id = 'button_holder' class="row">
+         <input type="submit" value="Next" class="waves-effect waves-light btn-small" onclick="submit_myform()" ></div>
+    </div>
+</div>
+<script type="text/javascript" >
+            function submit_myform(){
+				event.preventDefault();
+				console.log("form submitted!")  // sanity check
+				M.toast({html: "I've posted your request - may take a few to get the result!", classes: 'green rounded', displayLength:2000});
+				$.ajax({
+					url : "{% url 'RITMCreate' %}",
+					type: "POST",
+					header: {'X-CSRFToken': '{{ csrf_token }}'},
+					data: {
+						'id_location': document.getElementById("id_location").value,
+						'id_datacenter': document.getElementById("id_datacenter").value,
+						'id_firewall': document.getElementById("id_firewall").value,
+						'ike_crypto_profile': document.getElementById("ike_crypto_profile").value,
+						'ike_ipsec_profile': document.getElementById("ike_ipsec_profile").value,
+						'outside_interface_field': document.getElementById("outside_interface_field").value,
+						'inside_tunnel_id': document.getElementById("inside_tunnel_id").value,
+						'ike_gateway_name': document.getElementById("ike_gateway_name").value,
+						'csrfmiddlewaretoken': '{{ csrf_token }}',
+					},
+					'dataType': 'json',
+					success : function(json) {
+				    	    console.log(json.result);
+				    	    if (json.result == 'success'){
+				    	        M.toast({html: "created a change for this. Once approved try running it! - \( ﾟヮﾟ)/", classes: 'green rounded', displayLength:2000});
+				    	        console.log("success");
+				    	        console.log(json.change_id);
+				    	        M.toast({html: "Im Going to Transition you to next page in 5 seconds", classes: 'green rounded', displayLength:2000});
+				    	        setTimeout(redirectMe(json.change_id), 5000);
+				    	    } else {
+				    	        M.toast({html: "( ・◇・)？something went wrong with this request. Check the console logs (f12)", classes: 'red rounded', displayLength:6000});
+				    	        M.toast({html: "( ・◇・)？Actually the backend says: "+ json.data, classes: 'red rounded', displayLength:6000});
+				    	        $('#error_message_div').append("<p>"+json.data+"</p>");
+				    	        console.log(json.data);
+				    	    }
+
+				    },
+					error : function(xhr,errmsg,err) {
+						M.toast({html: "SOMETHING WENT HORRIBLY WRONG I dont know what check my logs?", classes: 'red rounded', displayLength:6000});
+						console.log(xhr.status + ": " + xhr.responseText); // provide a bit more info about the error to the console
+					}
+			});});
+
+
+
+
+
+        $(document).ready(function(){
+            $('#data_center_field').hide()
+            $('#firewall_field').hide()
+            $('#outside_interface_field').hide()
+            $('#inside_tunnel_field').hide()
+            $('#ike_form_field').hide()
+            $.ajax({
+                url : "{% url 'AJAXGetLOCATIONSFULLLIST' %}",
+                type: "GET",
+                data: {
+                    'csrfmiddlewaretoken': '{{ csrf_token }}',
+                },
+                success: function(data){
+                    $('#id_location').html(data);
+                    $('#id_location').formSelect();
+                }
+            });
+        });
+        function redirectMe(id){
+            window.location.href = "{% url 'CHANGELIST' %}"+id
+        };
+        $("#id_location").change(function(){
+          if ($("#id_location").val() >= 0) {
+              $.ajax({
+                    url : "{% url 'AJAXGetDATACENTERSFULLLIST' %}",
+                    type: "GET",
+                    data: {
+                        'csrfmiddlewaretoken': '{{ csrf_token }}',
+                    },
+                    success: function(data){
+                        $('#data_center_field').show();
+                        $('#id_datacenter').html(data);
+                        $('#id_datacenter').formSelect();
+                    }
+                });
+              } else {
+                console.log('soon')
+              }
+        });
+        $("#id_datacenter").change(function(){
+          if ($("#id_datacenter").val() >= 0) {
+              $.ajax({
+                    url : "{% url 'AJAXGetFirewalls_DC_Specific' %}",
+                    type: "GET",
+                    data: {
+                        'csrfmiddlewaretoken': '{{ csrf_token }}',
+                        'datacenter_id': $("#id_datacenter").val(),
+                    },
+                    success: function(data){
+                        $('#firewall_field').show();
+                        $('#id_firewall').html(data);
+                        $('#id_firewall').formSelect();
+                    }
+                });
+              } else {
+                console.log('soon')
+              }
+        });
+        $("#id_firewall").change(function(){
+          if ($("#id_firewall").val() >= 0) {
+              $.ajax({
+                    url : "{% url 'AJAXGetOUTSIDEINTERFACE_FW_SPECIFIC' %}",
+                    type: "GET",
+                    data: {
+                        'csrfmiddlewaretoken': '{{ csrf_token }}',
+                        'firewall_id': $("#id_firewall").val(),
+                    },
+                    success: function(data){
+                        $('#outside_interface_field').show();
+                        $('#id_outside_interface').html(data);
+                        $('#id_outside_interface').formSelect();
+                    }
+                });
+              } else {
+                console.log('soon')
+              }
+        });
+        $("#id_outside_interface").change(function(){
+          if ($("#id_outside_interface").val() >= 0) {
+              $.ajax({
+                    url : "{% url 'AJAXGetTunnelInterfaces_FW_SPECIFIC' %}",
+                    type: "GET",
+                    data: {
+                        'csrfmiddlewaretoken': '{{ csrf_token }}',
+                        'firewall_id': $("#id_firewall").val(),
+                    },
+                    success: function(data){
+                        $('#inside_tunnel_field').show();
+                        $('#inside_tunnel_id').html(data);
+                        $('#inside_tunnel_id').formSelect();
+                        $('#ike_form_field').show()
+                    }
+                });
+              } else {
+                console.log('soon')
+              }
+        });
+
+</script>
+
+
+
+{% endblock %}
